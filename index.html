@@ -1,0 +1,1656 @@
+<!DOCTYPE html><html data-theme="light"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SageMath IDE</title>
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'&gt;&lt;polygon points='50,6 88,28 88,72 50,94 12,72 12,28' fill='%238B5CF6'/&gt;&lt;text x='50' y='68' font-family='Arial, sans-serif' font-size='60' font-weight='bold' fill='%23fff' text-anchor='middle'&gt;S&lt;/text&gt;&lt;/svg&gt;">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/anyword-hint.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+
+  <script src="https://sage-sk.org/static/embedded_sagecell.js"></script>
+
+  <style>
+    /* ── Theme Variables ── */
+    :root {
+      --bg-body: #f1f5f9;
+      --bg-surface: #ffffff;
+      --bg-hover: #f1f5f9;
+      --bg-inset: #f8fafc;
+      --bg-editor: #ffffff;
+      --bg-gutter: #f8fafc;
+      --bg-overlay: rgba(0,0,0,0.18);
+      --border: #e2e8f0;
+      --border-focus: #818cf8;
+      --text: #1e293b;
+      --text-2: #475569;
+      --text-3: #94a3b8;
+      --text-4: #cbd5e1;
+      --accent: #6366f1;
+      --accent-text: #6366f1;
+      --accent-tab: #6366f1;
+      --accent-soft: #ede9fe;
+      --error-text: #dc2626;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --tab-active-bg: #ffffff;
+      --tab-active-border: #6366f1;
+      --badge-bg: #6366f1;
+      --badge-text: #fff;
+      --shadow: 0 10px 40px rgba(0,0,0,0.08);
+      --ln-color: #94a3b8;
+      --cursor-color: #1e293b;
+    }
+
+    [data-theme="dark"] {
+      --bg-body: #0f172a;
+      --bg-surface: #1e293b;
+      --bg-hover: #334155;
+      --bg-inset: #1a2235;
+      --bg-editor: #0f172a;
+      --bg-gutter: #1e293b;
+      --bg-overlay: rgba(0,0,0,0.55);
+      --border: #334155;
+      --text: #e2e8f0;
+      --text-2: #94a3b8;
+      --text-3: #64748b;
+      --text-4: #475569;
+      --accent-text: #818cf8;
+      --accent-tab: #c4b5fd;
+      --accent-soft: rgba(99,102,241,0.15);
+      --error-text: #fca5a5;
+      --tab-active-bg: #0f172a;
+      --tab-active-border: #818cf8;
+      --shadow: 0 10px 40px rgba(0,0,0,0.4);
+      --ln-color: #4a5578;
+      --cursor-color: #f8f8f0;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg-body);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5em 1em;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 0.6em; }
+    .logo {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, #8B5CF6, #a78bfa);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px; color: #fff;
+    }
+    .topbar h1 { font-size: 0.95rem; font-weight: 600; letter-spacing: -0.02em; }
+    .topbar h1 span { color: var(--accent-text); }
+    .topbar-right { display: flex; align-items: center; gap: 0.4em; }
+    .btn-sep { width: 1px; height: 20px; background: var(--border); margin: 0 0.1em; }
+
+    /* ── Buttons ── */
+    .run-btn {
+      padding: 0.4em 1.2em;
+      background: linear-gradient(135deg, #8B5CF6, #a78bfa);
+      color: #fff; border: none; border-radius: 6px;
+      font-size: 0.82rem; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 0.35em;
+      font-family: inherit; transition: opacity 0.2s, transform 0.1s;
+    }
+    .run-btn:hover { opacity: 0.9; }
+    .run-btn:active { transform: scale(0.97); }
+    .run-btn:disabled { opacity: 0.4; cursor: wait; }
+    .run-btn svg { width: 13px; height: 13px; }
+    .clear-btn {
+      padding: 0.4em 0.8em; background: transparent;
+      color: var(--text-2); border: 1px solid var(--border);
+      border-radius: 6px; font-size: 0.78rem; cursor: pointer;
+      font-family: inherit; transition: border-color 0.2s, color 0.2s;
+    }
+    .clear-btn:hover { border-color: var(--text-3); color: var(--text); }
+    .icon-btn {
+      width: 31px; height: 31px;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text-2); cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .icon-btn:hover { border-color: var(--text-3); color: var(--text); background: var(--bg-hover); }
+    .icon-btn svg { width: 15px; height: 15px; }
+    .icon-btn .btn-label {
+      display: none; position: absolute; bottom: -26px; left: 50%;
+      transform: translateX(-50%); font-size: 0.65rem; white-space: nowrap;
+      background: var(--bg-surface); border: 1px solid var(--border);
+      border-radius: 4px; padding: 2px 6px; color: var(--text-2);
+      pointer-events: none; z-index: 50;
+    }
+    .icon-btn:hover .btn-label { display: block; }
+
+    /* ── Main Layout ── */
+    .main { display: flex; flex: 1; min-height: 0; }
+    .panel-editor {
+      width: 50%; display: flex; flex-direction: column;
+      border-right: 1px solid var(--border); min-width: 0;
+    }
+
+    /* ── File Tabs ── */
+    .file-tabs-bar {
+      display: flex; align-items: stretch;
+      background: var(--bg-surface); border-bottom: 1px solid var(--border);
+      flex-shrink: 0; overflow-x: auto; min-height: 34px;
+    }
+    .file-tabs-bar::-webkit-scrollbar { height: 0; }
+    .file-tab {
+      display: flex; align-items: center; gap: 0.35em;
+      padding: 0 0.65em; font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace; color: var(--text-3);
+      cursor: pointer; border-right: 1px solid var(--border);
+      white-space: nowrap; position: relative;
+      transition: background 0.15s, color 0.15s; user-select: none;
+    }
+    .file-tab:not(.main-tab) { cursor: grab; }
+    .file-tab:not(.main-tab):active { cursor: grabbing; }
+    .file-tab:hover { background: var(--bg-hover); color: var(--text-2); }
+    .file-tab.active {
+      background: var(--tab-active-bg);
+      color: var(--accent-tab);
+      border-bottom: 2px solid var(--tab-active-border);
+    }
+    .file-tab .tab-icon { width: 12px; height: 12px; opacity: 0.4; flex-shrink: 0; }
+    .file-tab.active .tab-icon { opacity: 0.7; }
+    .file-tab .tab-name { pointer-events: none; }
+    .file-tab .tab-close {
+      width: 16px; height: 16px; border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.15s, background 0.15s; flex-shrink: 0;
+    }
+    .file-tab:hover .tab-close, .file-tab.active .tab-close { opacity: 0.5; }
+    .file-tab .tab-close:hover { opacity: 1; background: var(--bg-hover); }
+    .file-tab .tab-close svg { width: 10px; height: 10px; }
+    .file-tab.main-tab .tab-close { display: none; }
+    .file-tab .tab-badge {
+      font-size: 0.58rem; background: var(--badge-bg); color: var(--badge-text);
+      padding: 0 0.35em; border-radius: 3px; line-height: 1.5; flex-shrink: 0;
+    }
+    /* Drag indicators */
+    .file-tab.dragging { opacity: 0.3; }
+    .file-tab.drag-over-left::before {
+      content: ''; position: absolute;
+      left: -1px; top: 4px; bottom: 4px;
+      width: 2.5px; background: var(--accent); border-radius: 2px; z-index: 5;
+    }
+    .file-tab.drag-over-right::after {
+      content: ''; position: absolute;
+      right: -1px; top: 4px; bottom: 4px;
+      width: 2.5px; background: var(--accent); border-radius: 2px; z-index: 5;
+    }
+    .tab-add-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 32px; min-width: 32px; cursor: pointer;
+      color: var(--text-4); border: none; background: transparent; font-size: 16px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .tab-add-btn:hover { color: var(--text-2); background: var(--bg-hover); }
+
+    /* ── Info Bar ── */
+    .panel-info {
+      display: flex; align-items: center; gap: 0.5em;
+      padding: 0.3em 1em; background: var(--bg-inset);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.68rem; color: var(--text-4);
+      flex-shrink: 0; flex-wrap: wrap;
+    }
+    .panel-info .run-order { color: var(--text-3); }
+    .panel-info .run-order em { color: var(--accent-text); font-style: normal; }
+    .drag-hint { color: var(--text-4); font-style: italic; }
+    .shortcuts { margin-left: auto; font-size: 0.68rem; color: var(--text-4); }
+    .shortcuts kbd {
+      background: var(--bg-hover); padding: 0.1em 0.35em; border-radius: 3px;
+      font-size: 0.68rem; color: var(--text-2); font-family: inherit;
+      border: 1px solid var(--border);
+    }
+
+    /* ── Editor ── */
+    .editor-wrap { flex: 1; overflow: hidden; }
+    .editor-wrap .CodeMirror {
+      height: 100%;
+      font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+      font-size: 13.5px; line-height: 1.6; padding-top: 0.3em;
+      background: var(--bg-editor) !important;
+    }
+    .editor-wrap .CodeMirror-gutters {
+      background: var(--bg-gutter) !important;
+      border-right: 1px solid var(--border) !important;
+    }
+    .editor-wrap .CodeMirror-linenumber {
+      color: var(--ln-color) !important;
+    }
+    .editor-wrap .CodeMirror-cursor {
+      border-left-color: var(--cursor-color) !important;
+    }
+    /* Fix CM default selected bg for light */
+    [data-theme="light"] .editor-wrap .CodeMirror-selected { background: #d7d4f0 !important; }
+    [data-theme="light"] .editor-wrap .CodeMirror-focused .CodeMirror-selected { background: #d7d4f0 !important; }
+
+    /* ── Output Panel ── */
+    .panel-output { width: 50%; display: flex; flex-direction: column; min-width: 0; }
+    .panel-header {
+      display: flex; align-items: center; gap: 0.45em;
+      padding: 0.45em 1em; background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.76rem; color: var(--text-2); flex-shrink: 0;
+    }
+    .panel-header .icon { width: 14px; height: 14px; opacity: 0.5; }
+    .output-scroll {
+      flex: 1; overflow-y: auto; padding: 1em 1.2em; background: var(--bg-body);
+    }
+    .output-scroll::-webkit-scrollbar { width: 6px; }
+    .output-scroll::-webkit-scrollbar-track { background: transparent; }
+    .output-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* Sage output */
+    #output .sagecell_output {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.8em; margin-bottom: 0.8em;
+    }
+    #output pre, #output .sagecell_output pre {
+      color: var(--text) !important;
+      background: transparent !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 13px !important;
+      white-space: pre-wrap; word-break: break-word;
+    }
+    #output .sagecell_output_error pre { color: var(--error-text) !important; }
+    #output img { max-width: 100%; border-radius: 6px; margin: 0.3em 0; }
+
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; height: 100%;
+      color: var(--text-4); text-align: center; gap: 0.6em;
+    }
+    .empty-state svg { width: 40px; height: 40px; opacity: 0.4; }
+    .empty-state p { font-size: 0.85rem; }
+
+    /* ── Autocomplete ── */
+    .CodeMirror-hints {
+      font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+      max-height: 220px; border: 1px solid var(--border); border-radius: 6px;
+      box-shadow: var(--shadow); background: var(--bg-surface);
+      color: var(--text); z-index: 200; padding: 3px;
+    }
+    .CodeMirror-hint { padding: 3px 8px; border-radius: 3px; white-space: nowrap; }
+    li.CodeMirror-hint-active { background: var(--accent); color: #fff; }
+    .hint-kind { float: right; margin-left: 2em; font-size: 0.78em; opacity: 0.4; }
+    li.CodeMirror-hint-active .hint-kind { opacity: 0.7; }
+
+    /* Hidden */
+    #sagecell-hidden { height: 0; overflow: hidden; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: var(--bg-overlay); z-index: 500;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--bg-surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1.4em; width: 340px; max-width: 90vw;
+      box-shadow: var(--shadow);
+    }
+    .modal h3 { font-size: 0.9rem; margin-bottom: 0.8em; }
+    .modal input[type="text"] {
+      width: 100%; padding: 0.5em 0.7em;
+      background: var(--bg-body); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text);
+      font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; outline: none;
+    }
+    .modal input[type="text"]:focus { border-color: var(--border-focus); }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 0.5em; margin-top: 1em; }
+    .modal-actions button {
+      padding: 0.4em 1em; border-radius: 6px; font-size: 0.8rem;
+      cursor: pointer; font-family: inherit; border: none;
+    }
+    .modal-actions .cancel-btn {
+      background: transparent; color: var(--text-2); border: 1px solid var(--border);
+    }
+    .modal-actions .cancel-btn:hover { border-color: var(--text-3); }
+    .modal-actions .save-btn { background: var(--accent); color: #fff; }
+    .modal-actions .save-btn:hover { opacity: 0.9; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: var(--bg-surface); border: 1px solid var(--border);
+      color: var(--text); padding: 0.6em 1.4em; border-radius: 8px;
+      font-size: 0.8rem; font-family: 'Inter', system-ui, sans-serif;
+      opacity: 0; transition: opacity 0.3s, transform 0.3s;
+      z-index: 1000; box-shadow: var(--shadow); pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.toast-error { border-color: #ef4444; color: var(--error-text); }
+    .toast.toast-success { border-color: var(--success); }
+
+    /* ── Responsive ── */
+    @media (max-width: 700px) {
+      .main { flex-direction: column; }
+      .panel-editor { width: 100%; height: 45%; border-right: none; border-bottom: 1px solid var(--border); }
+      .panel-output { width: 100%; height: 55%; }
+      .shortcuts, .drag-hint { display: none; }
+    }
+	
+	/* ── Footer ── */
+	.footer {
+	  display: flex;
+	  align-items: center;
+	  justify-content: center;
+	  gap: 0.5em;
+	  padding: 0.6em 1em;
+	  background: var(--bg-surface);
+	  border-top: 1px solid var(--border);
+	  font-size: 0.72rem;
+	  color: var(--text-4);
+	  flex-shrink: 0;
+	}
+	.footer a {
+	  color: var(--accent-text);
+	  text-decoration: none;
+	  transition: opacity 0.2s;
+	}
+	.footer a:hover {
+	  opacity: 0.8;
+	  text-decoration: underline;
+	}
+	.footer-sep {
+	  color: var(--text-3);
+	}
+	
+	/* ── Hide some elements ── */
+	
+	.sagecell_poweredBy {
+		display: none !important;
+	}
+	/* Hint type indicators */
+	.hint-function { color: var(--accent-text); }
+	.hint-class { color: #f59e0b; }
+	.hint-variable { color: #22c55e; }
+	.hint-import { color: #ec4899; }
+
+	.CodeMirror-hint { 
+	  padding: 3px 8px; 
+	  border-radius: 3px; 
+	  white-space: nowrap;
+	  display: flex;
+	  justify-content: space-between;
+	  align-items: center;
+	}
+
+	li.CodeMirror-hint-active { 
+	  background: var(--accent); 
+	  color: #fff; 
+	}
+
+	.hint-kind { 
+	  float: right; 
+	  margin-left: 2em; 
+	  font-size: 0.75em; 
+	  opacity: 0.5;
+	  text-transform: uppercase;
+	  letter-spacing: 0.05em;
+	}
+
+	li.CodeMirror-hint-active .hint-kind { 
+	  opacity: 0.8; 
+	}
+  </style>
+
+  <script>
+  sagecell.makeSagecell({
+    inputLocation: '#sagecell-hidden',
+    outputLocation: '#output',
+    editor: 'textarea',
+    replaceOutput: false,
+    hide: ['editor','evalButton','permalink','done','sessionFiles','language'],
+    callback: function () {
+      document.getElementById('run').disabled = false;
+    }
+  });
+  </script>
+
+<!-- ── Top Bar ── -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">S</div>
+    <h1>Sage<span>Cell</span> IDE</h1>
+  </div>
+  <div class="topbar-right">
+
+    <!-- Theme toggle -->
+    <button class="icon-btn" id="theme-btn" title="Toggle theme">
+      <svg id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+      <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+    </button>
+
+    <div class="btn-sep"></div>
+
+    <!-- Open project -->
+    <button class="icon-btn" id="upload-btn" title="Open project (.json)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="17 8 12 3 7 8"></polyline>
+        <line x1="12" y1="3" x2="12" y2="15"></line>
+      </svg>
+    </button>
+
+    <!-- Save project -->
+    <button class="icon-btn" id="download-btn" title="Save project (.json)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+    </button>
+
+    <div class="btn-sep"></div>
+    <button class="clear-btn" id="clear">Clear Output</button>
+    <button class="run-btn" id="run" disabled="">
+      <svg viewBox="0 0 24 24" fill="none"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor"></polygon></svg>
+      Run All
+    </button>
+  </div>
+</div>
+
+<!-- ── Main Split ── -->
+<div class="main">
+  <div class="panel-editor">
+    <div class="file-tabs-bar" id="file-tabs-bar">
+      <button class="tab-add-btn" id="add-tab-btn" title="New file">+</button>
+    </div>
+    <div class="panel-info">
+      <span class="run-order">Execution: <em id="run-order-text"></em> <span class="drag-hint">&nbsp;· drag tabs to reorder</span></span>
+      <span class="shortcuts"><kbd>Shift</kbd>+<kbd>Enter</kbd> run &nbsp; <kbd>Ctrl</kbd>+<kbd>Space</kbd> complete</span>
+    </div>
+    <div class="editor-wrap" id="editor"></div>
+  </div>
+
+  <div class="panel-output">
+    <div class="panel-header">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+      Output
+    </div>
+    <div class="output-scroll">
+      <div id="output">
+        <div class="empty-state" id="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+          <p>Run your code to see results here</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Rename Modal ── -->
+<div class="modal-overlay" id="rename-modal">
+  <div class="modal">
+    <h3>Rename file</h3>
+    <input type="text" id="rename-input" spellcheck="false">
+    <div class="modal-actions">
+      <button class="cancel-btn" id="rename-cancel">Cancel</button>
+      <button class="save-btn" id="rename-save">Rename</button>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden file input -->
+<input type="file" id="file-upload-input" accept=".json" style="display:none">
+
+<!-- Hidden SageCell -->
+<div id="sagecell-hidden">
+  <script type="text/x-sage"></script>
+</div>
+
+<!-- ── Footer ─ -->
+<div class="footer">
+  <span>© 2026 Dominik Borovský & Jozef Hanč </span>
+  <span class="footer-sep">·</span>
+  <a href="https://www.sagemath.org" target="_blank" rel="noopener">Powered by SageMath</a>
+</div>
+</head>
+<body>
+
+<script>
+(function () {
+
+  /* ── File State ─────────────────────────────────────────────────── */
+  var files = [
+    { id: 'main', name: 'main.sage', content: '', isMain: true },
+    { id: 'helpers', name: 'helpers.sage', content: '# You can write helper functions here\n# Runs before main.sage\n\n', isMain: false }
+  ];
+  var activeFileId = 'main';
+  var fileCounter = 1;
+  var draggedFileId = null;
+  var isDark = false;
+
+  /* ── Sage Keywords ──────────────────────────────────────────────── */
+  var SAGE_WORDS = {
+		// Python keywords and built-ins
+		python: [
+			'False','None','True','and','as','assert','async','await','break',
+			'class','continue','def','del','elif','else','except','finally',
+			'for','from','global','if','import','in','is','lambda','nonlocal',
+			'not','or','pass','raise','return','try','while','with','yield',
+			'print()','range()','len()','list()','dict()','set()','tuple()',
+			'int()','float()','str()','bool()','type()','isinstance()',
+			'enumerate()','zip()','map()','filter()','sorted()','reversed()',
+			'sum()','min()','max()','abs()','round()','input()','open()',
+			'super()','property()','dir()','help()','hasattr()','getattr()',
+			'setattr()','delattr()','vars()','globals()','locals()','callable()',
+			'iter()','next()','id()','hash()','repr()','ascii()','bin()',
+			'oct()','hex()','chr()','ord()','pow()','divmod()','format()',
+			'slice()','memoryview()','bytearray()','bytes()','frozenset()',
+			'complex()','object()','staticmethod()','classmethod()','eval()',
+			'exec()','compile()','breakpoint()','exit()','quit()'
+		],
+		
+		// Symbolic variables and basic symbolic
+		symbolic: [
+			'var()','SR','Expression','symbolic_expression()','hold()','forget()',
+			'reset()','restore()','save()','load()','attach()','detach()',
+			'sage_eval()','preparse()'
+		],
+		
+		// Core calculus - limits, derivatives, integrals
+		calculus: [
+			// Limits and series
+			'limit()','lim()','taylor()','series()','asymptotic_expansion()',
+			'power_series()','laurent_series()','puiseux_series()',
+			
+			// Differentiation
+			'diff()','derivative()','grad()','gradient()','hessian()',
+			'jacobian()','laplacian()','curl()','divergence()',
+			
+			// Integration
+			'integrate()','integral()','numerical_integral()','nintegrate()',
+			'quad()','dblquad()','tplquad()',
+			
+			// Sums and products
+			'sum()','prod()','product()','summation()',
+			
+			// Transforms and special
+			'fourier_series()','fourier_transform()','inverse_fourier_transform()',
+			'laplace()','inverse_laplace()','mellin_transform()',
+			'convolution()','piecewise()'
+		],
+		
+		// Methods called with dot notation on expressions/functions
+		calculus_methods: [
+			// Differentiation methods
+			'.diff()','.derivative()','.grad()','.gradient()','.hessian()',
+			'.jacobian()','.laplacian()','.curl()','.divergence()',
+			
+			// Integration methods
+			'.integrate()','.integral()','.nintegrate()',
+			
+			// Limits and series
+			'.limit()','.taylor()','.series()','.power_series()',
+			'.laurent_series()','.puiseux_series()','.fourier_series()',
+			
+			// Expansion methods
+			'.expand()','.expand_trig()','.expand_log()','.expand_rational()',
+			'.expand_complex()','.expand_sum()','.expand_func()',
+			
+			// Simplification methods
+			'.simplify()','.simplify_full()','.simplify_trig()',
+			'.simplify_rational()','.simplify_log()','.simplify_radical()',
+			'.simplify_factorial()','.simplify_hypergeometric()',
+			'.canonicalize_radical()','.trig_simplify()','.log_simplify()',
+			'.rational_simplify()','.radical_simplify()','.full_simplify()',
+			
+			// Factorization and collection
+			'.factor()','.factor_list()','.collect()','.collect_common_factors()',
+			
+			// Coefficients and degrees
+			'.coefficients()','.coeff()','.lc()','.lm()','.lt()',
+			'.degree()','.total_degree()',
+			
+			// Substitution
+			'.subs()','.substitute()','.subs_expr()','.substitute_function()',
+			
+			// Structural methods
+			'.variables()','.arguments()','.operands()','.operator()',
+			'.lhs()','.rhs()','.left()','.right()',
+			'.numerator()','.denominator()','.numer()','.denom()',
+			'.numerical_approx()','.n()','.N()','.approx()',
+			
+			// Partial fractions
+			'.partial_fraction()','.partial_fraction_decomposition()',
+			
+			// Transforms
+			'.laplace()','.inverse_laplace()','.fourier_transform()',
+			'.inverse_fourier_transform()',
+			
+			// Evaluation
+			'.eval()','.evalf()','.truncate()'
+		],
+		
+		// Simplification and manipulation
+		simplify: [
+			'simplify()','simplify_full()','simplify_trig()',
+			'simplify_rational()','simplify_log()','simplify_radical()',
+			'simplify_factorial()','simplify_hypergeometric()',
+			'canonicalize_radical()','trig_simplify()','log_simplify()',
+			'radical_simplify()','rational_simplify()','full_simplify()',
+			'expand()','expand_trig()','expand_log()','expand_rational()',
+			'expand_complex()','expand_sum()','expand_func()',
+			'factor()','factor_list()','collect()','combine()',
+			'partial_fraction()','apart()','together()','cancel()',
+			'ratsimp()','trigsimp()','logcombine()','powsimp()',
+			'combsimp()','hypersimp()','nsimplify()',
+			'round()','numerical_approx()','n()','N()'
+		],
+		
+		// Algebra and equation solving
+		algebra: [
+			'solve()','solve_ineq()','solve_mod()','solve_diophantine()',
+			'roots()','nroots()','find_root()','find_local_maximum()',
+			'find_local_minimum()','find_fit()','fit()',
+			'parametric_plot()','implicit_plot()',
+			'factor()','expand()','collect()','combine()',
+			'assume()','forget()','assumptions()','assuming()',
+			'sqrt()','cbrt()','root()','real_root()','nth_root()',
+			'log()','ln()','log2()','log10()','exp()','expm1()','log1p()',
+			'sin()','cos()','tan()','sec()','csc()','cot()',
+			'asin()','acos()','atan()','atan2()','acot()','asec()','acsc()',
+			'sinh()','cosh()','tanh()','sech()','csch()','coth()',
+			'asinh()','acosh()','atanh()','acoth()','asech()','acsch()',
+			'pi','e','I','oo','infinity','NaN','nan',
+			'EllipticE()','EllipticF()','EllipticPi()','EllipticK()',
+			'gamma()','psi()','beta()','erf()','erfc()','erfi()','erfinv()',
+			'bessel_J()','bessel_Y()','bessel_I()','bessel_K()',
+			'hypergeometric()','hypergeometric_U()','hypergeometric_M()',
+			'airy_ai()','airy_bi()','spherical_bessel_J()','spherical_bessel_Y()',
+			'Rational()','Integer()','RealNumber()','ComplexNumber()',
+			'QQ','ZZ','RR','CC','AA','QQbar','CDF','RDF','RIF','CIF',
+			'binomial()','factorial()','double_factorial()',
+			'falling_factorial()','rising_factorial()',
+			'fibonacci()','lucas()','harmonic_number()',
+			'bernoulli()','euler()','catalan()',
+			'stirling_number1()','stirling_number2()',
+			'bell_number()','partition()','partitions()',
+			'gcd()','xgcd()','lcm()','mod()','power_mod()','inverse_mod()',
+			'is_prime()','is_pseudoprime()','next_prime()','previous_prime()',
+			'prime_range()','primes()','nth_prime()','prime_pi()','prime_power()',
+			'euler_phi()','totient()','divisors()','sigma()','divisor_sigma()',
+			'moebius()','moebius_mu()','li()','Li()','primezeta()',
+			'continued_fraction()','convergents()','continued_fraction_list()',
+			'quadratic_residues()','legendre_symbol()','jacobi_symbol()',
+			'kronecker_symbol()','modular_symbol()','hecke_operator()','newform()'
+		],
+		
+		// Linear algebra
+		linalg: [
+			'matrix()','Matrix','vector()','Vector()','vector_space()','VectorSpace()',
+			'FreeModule()','identity_matrix()','zero_matrix()','ones_matrix()',
+			'diagonal_matrix()','block_matrix()','block_diagonal_matrix()',
+			'random_matrix()','companion_matrix()','hilbert_matrix()',
+			'vandermonde_matrix()','toeplitz_matrix()','circulant_matrix()',
+			'det()','rank()','trace()','transpose()','T','conjugate()','H',
+			'eigenvalues()','eigenvectors()','eigenmatrix_left()','eigenmatrix_right()',
+			'echelon_form()','rref()','hermite_form()','smith_form()',
+			'kernel()','left_kernel()','right_kernel()','image()',
+			'row_space()','column_space()',
+			'nullity()','dimension()','degree()',
+			'solve_right()','solve_left()','solve()','gauss_jordan_solve()',
+			'cholesky()','LU()','QR()','SVD()','hessenberg_form()','jordan_form()',
+			'rational_form()','primary_decomposition()','decomposition()',
+			'characteristic_polynomial()','charpoly()',
+			'minimal_polynomial()','minpoly()',
+			'companion_matrix()','frobenius()',
+			'norm()','norm2()','gram_schmidt()','augment()','stack()',
+			'tensor_product()','kronecker_product()',
+			'exponential()','log()','sqrtm()',
+			'is_invertible()','is_symmetric()','is_hermitian()',
+			'is_positive_definite()','is_diagonalizable()','is_nilpotent()',
+			'PolynomialRing()','NumberField()','QuadraticField()','CyclotomicField()',
+			'AbsoluteExtension()','RelativeExtension()','GaloisGroup()',
+			'GF()','FiniteField()','Zp()','Qp()','SR','AA','QQbar','CDF','RDF'
+		],
+		
+		// Matrix and vector methods (dot notation)
+		linalg_methods: [
+			// Transpose and conjugate
+			'.T','.transpose()','.H','.conjugate()','.adjoint()',
+			
+			// Basic properties
+			'.det()','.determinant()','.rank()','.trace()','.norm()',
+			
+			// Eigenvalues and polynomials
+			'.eigenvalues()','.eigenvectors_left()','.eigenvectors_right()',
+			'.charpoly()','.characteristic_polynomial()',
+			'.minpoly()','.minimal_polynomial()',
+			
+			// Canonical forms
+			'.rref()','.echelon_form()','.hermite_form()','.smith_form()',
+			'.jordan_form()','.rational_form()','.hessenberg_form()',
+			'.frobenius_form()',
+			
+			// Kernels and images
+			'.kernel()','.left_kernel()','.right_kernel()',
+			'.image()','.row_space()','.column_space()',
+			
+			// Solving
+			'.solve_right()','.solve_left()','.gauss_jordan_solve()',
+			
+			// Predicates
+			'.is_invertible()','.is_symmetric()','.is_hermitian()',
+			'.is_positive_definite()','.is_diagonalizable()',
+			'.is_nilpotent()','.is_diagonal()','.is_normal()',
+			
+			// Construction
+			'.augment()','.stack()','.tensor_product()','.kronecker_product()',
+			
+			// Decompositions
+			'.cholesky()','.LU()','.QR()','.SVD()',
+			
+			// Matrix functions
+			'.exponential()','.exp()','.log()','.sqrt()','.powers()',
+			
+			// Element-wise operations
+			'.apply_map()','.apply_morphism()','.change_ring()',
+			
+			// Access
+			'.rows()','.columns()','.row()','.column()','.submatrix()',
+			'.pivot_rows()','.pivots()','.nonpivots()',
+			
+			// Reduction
+			'.gram_schmidt()','.LLL()','.BKZ()',
+			
+			// Output
+			'.str()','.latex()','._latex_()','._repr_()','._ascii_art_()'
+		],
+		
+		// Plotting and visualization
+		plot: [
+			'plot()','plot2d()','parametric_plot()','polar_plot()','implicit_plot()',
+			'plot3d()','parametric_plot3d()','implicit_plot3d()',
+			'contour_plot()','contour_plot3d()','region_plot()','density_plot()',
+			'list_plot()','list_plot3d()','scatter_plot()','scatter3d()',
+			'bar_chart()','histogram()','boxplot()','violin_plot()',
+			'line()','line2d()','line3d()','polygon()','polygon2d()','polygon3d()',
+			'circle()','ellipse()','hyperbola()','parabola()','arc()','sector()',
+			'point()','point2d()','point3d()','points()','points2d()','points3d()',
+			'text()','text2d()','text3d()','arrow()','arrow2d()','arrow3d()',
+			'sphere()','cube()','tetrahedron()','octahedron()',
+			'dodecahedron()','icosahedron()',
+			'torus()','cylinder()','cone()',
+			'revolution_plot3d()','spherical_plot3d()','cylindrical_plot3d()',
+			'vector_field()','plot_vector_field()','plot_vector_field3d()',
+			'stream_plot()','slope_field()','direction_field()',
+			'complex_plot()','complex_root_plot()','riemann_surface()',
+			'animate()','show()','save()','export()',
+			'graphics_array()','multi_graphics()',
+			'Graphics','Graphics2d','Graphics3d','GraphicPrimitive',
+			'rainbow()','Color','colormaps','hue()','rgbcolor()',
+			'pointsize','thickness','rgbcolor','color','legend_label',
+			'axes','axes_labels','frame','gridlines','ticks','tick_formatter',
+			'xmin','xmax','ymin','ymax','zmin','zmax','aspect_ratio',
+			'figsize','dpi','transparent','fontsize'
+		],
+		
+		// Plot methods (dot notation)
+		plot_methods: [
+			'.show()','.save()','.export()','.axes()','.axes_labels()',
+			'.set_aspect_ratio()','.set_axes_range()','.set_legend_options()',
+			'.set_title()','.set_caption()','.set_figsize()',
+			'.translate()','.scale()','.rotate()',
+			'.aspect_ratio','.xmin','.xmax','.ymin','.ymax','.zmin','.zmax'
+		],
+		
+		// Interactivity and interface
+		interact: [
+			'interact()','interact_manual()','interact_layout()',
+			'slider()','range_slider()','discrete_slider()',
+			'input_box()','input_grid()','color_selector()','colorpicker()',
+			'selector()','dropdown()','radio_buttons()','button()','checkbox()',
+			'text_control()','html_control()','latex_control()',
+			'auto_update()','update()','continuous_update()',
+			'pretty_print()','pretty_print_default()','show_default()',
+			'latex()','view()','mathjax','MathJax','tachyon','tikz()',
+			'sage_eval()','preparse()','load()','attach()','unload()','detach()',
+			'data()','attach_spec()','load_attach_path()',
+			'walltime()','cputime()','timeit()','time()','timing()',
+			'html()','Math()','RawHtml()','SwfObject()','ThreeJS()',
+			'sagenb','jupyter','notebook','cell','worksheet'
+		],
+		
+		// Number theory and combinatorics
+		nt_comb: [
+			'ZZ','QQ','RR','CC','Integers()','Rationals()','Reals()','Complexes()',
+			'Primes()','Mersenne()','Fibonacci()','Catalan()',
+			'Mod()','mod()','IntegerModRing()','Zmod()',
+			'QuadraticForm()','BinaryQF()','TernaryQF()',
+			'EllipticCurve()','CremonaDatabase()','isogeny()','isogeny_class()',
+			'ModularForms()','CuspForms()','EisensteinForms()',
+			'DirichletGroup()','DirichletCharacter()',
+			'AbelianGroup()','PermutationGroup()','SymmetricGroup()',
+			'DihedralGroup()','AlternatingGroup()','CyclicGroup()',
+			'DirectProduct()','SemidirectProduct()',
+			'WeylGroup()','CoxeterGroup()','ReflectionGroup()',
+			'Poset()','LatticePoset()','YoungLattice()','PartitionLattice()',
+			'CombinatorialFreeModule()','SymmetricFunctions()',
+			'Schur','e','h','p','m','s',
+			'Partition()','Partitions()','Compositions()','Permutations()',
+			'Tableau()','StandardTableaux()','SemistandardTableaux()',
+			'YoungTableau()','YoungDiagram()','FerrersDiagram()',
+			'CartanType()','RootSystem()','WeylCharacterRing()',
+			'Crystals()','TensorProductOfCrystals()','HighestWeightCrystal()',
+			'ClusterSeed()','ClusterAlgebra()','Quiver()'
+		],
+		
+		// Statistics and probability
+		stats: [
+			'mean()','variance()','std()','standard_deviation()',
+			'median()','mode()',
+			'covariance()','correlation()','corrcoef()',
+			'random()','randint()','choice()','sample()','shuffle()',
+			'RealDistribution()','GeneralDiscreteDistribution()',
+			'SphericalDistribution()',
+			'Uniform()','Normal()','Exponential()','Gamma()','Beta()',
+			'ChiSquared()','TDistribution()','FDistribution()',
+			'LogNormal()','Weibull()','Pareto()',
+			'binomial_distribution()','poisson_distribution()',
+			'geometric_distribution()',
+			'empirical_distribution()','discrete_distribution()',
+			'fit_dist()','maximum_likelihood_estimate()','mle()',
+			'hypothesis_test()','t_test()','chi_square_test()','ks_test()',
+			'TimeSeries()','autoregressive_model()','arma()','arima()'
+		],
+		
+		// Numerical and scientific computing
+		numerical: [
+			'find_root()','find_maximum_on_interval()','find_minimum_on_interval()',
+			'numerical_integral()','numerical_diff()','numerical_approx()','n()','N()',
+			'fast_callable()','fast_float()','numpy','scipy','mpmath',
+			'ode_solver()','desolve()','desolve_rk4()','desolve_odeint()',
+			'desolve_laplace()','desolve_system()','desolve_mintides()',
+			'interpolate()','spline()','lagrange_polynomial()','newton_polynomial()',
+			'fft()','ifft()','dct()','idct()','dst()','idst()',
+			'wavelet()','wavelet_packet()','discrete_wavelet_transform()'
+		],
+		
+		// Differential equations
+		ode: [
+			'desolve()','desolve_laplace()','desolve_system()',
+			'desolve_rk4()','desolve_odeint()','desolve_mintides()',
+			'ode_solver()','odefun()',
+			'laplace()','inverse_laplace()','ilt()',
+			'dsolve()','ode2()','ic1()','ic2()','bc2()',
+			'function()','declare()','depends()','gradef()',
+			'diffeq2de()','de2diffeq()',
+			'DifferentialRing()','DifferentialField()',
+			'characteristic_series()','differential_chains()'
+		],
+		
+		// Geometry
+		geometry: [
+			'Point()','point()','Line()','line()','Segment()','segment()',
+			'Ray()','ray()',
+			'Circle()','circle()','Ellipse()','ellipse()',
+			'Hyperbola()','hyperbola()','Parabola()','parabola()',
+			'Arc()','arc()','Sector()','sector()',
+			'Polygon()','polygon()','Triangle()','triangle()',
+			'Polyhedron()','polyhedron()','Cone()','cone()',
+			'Cylinder()','cylinder()','Sphere()','sphere()',
+			'AffineSpace()','ProjectiveSpace()','EuclideanSpace()',
+			'AffineGroup()','EuclideanGroup()','SimilarityGroup()',
+			'translation()','rotation()','scaling()','reflection()',
+			'convex_hull()','voronoi_diagram()','delaunay_triangulation()',
+			'area()','perimeter()','volume()',
+			'centroid()','circumcenter()','incenter()','orthocenter()',
+			'is_convex()','is_collinear()','is_coplanar()',
+			'is_parallel()','is_perpendicular()'
+		],
+		
+		// Geometry methods (dot notation)
+		geometry_methods: [
+			'.area()','.perimeter()','.volume()',
+			'.centroid()','.circumcenter()','.incenter()','.orthocenter()',
+			'.is_convex()','.is_collinear()','.is_coplanar()',
+			'.is_parallel()','.is_perpendicular()',
+			'.intersection()','.distance()','.plot()','.show()'
+		],
+		
+		// Graph theory
+		graphs: [
+			'Graph()','DiGraph()','MultiGraph()','MultiDiGraph()',
+			'graphs','digraphs','graph_generators',
+			'CompleteGraph()','CycleGraph()','PathGraph()','StarGraph()',
+			'WheelGraph()','PetersenGraph()','HeawoodGraph()',
+			'CubeGraph()','IcosahedralGraph()',
+			'RandomGraph()','RandomTree()','RandomRegularGraph()',
+			'graph()','subgraph()','induced_subgraph()',
+			'union()','disjoint_union()','cartesian_product()',
+			'vertices()','edges()','neighbors()',
+			'degree()','in_degree()','out_degree()',
+			'add_vertex()','add_edge()','delete_vertex()','delete_edge()',
+			'is_connected()','is_planar()','is_bipartite()',
+			'is_tree()','is_forest()',
+			'connected_components()','strongly_connected_components()',
+			'shortest_path()','all_shortest_paths()',
+			'diameter()','radius()','center()',
+			'chromatic_number()','chromatic_polynomial()','coloring()',
+			'clique_number()','cliques()','independent_set()',
+			'matching()','perfect_matching()','max_flow()','min_cut()',
+			'spanning_tree()','min_spanning_tree()','kruskal()','prim()',
+			'adjacency_matrix()','incidence_matrix()','laplacian_matrix()',
+			'spectrum()','eigenvalues()','eigenvectors()',
+			'layout()','plot()','show()','save()','export()',
+			'graphviz','dot2tex'
+		],
+		
+		// Graph methods (dot notation)
+		graph_methods: [
+			'.vertices()','.edges()','.neighbors()',
+			'.degree()','.in_degree()','.out_degree()',
+			'.add_vertex()','.add_edge()','.delete_vertex()','.delete_edge()',
+			'.is_connected()','.is_planar()','.is_bipartite()',
+			'.is_tree()','.is_forest()','.is_regular()','.is_eulerian()',
+			'.connected_components()','.strongly_connected_components()',
+			'.shortest_path()','.all_shortest_paths()',
+			'.diameter()','.radius()','.center()','.periphery()',
+			'.chromatic_number()','.chromatic_polynomial()','.coloring()',
+			'.clique_number()','.cliques()','.cliques_maximal()',
+			'.independent_set()','.matching()','.perfect_matching()',
+			'.max_flow()','.min_cut()','.edge_cut()','.vertex_cut()',
+			'.spanning_tree()','.min_spanning_tree()',
+			'.kruskal()','.prim()','.boruvka()',
+			'.adjacency_matrix()','.incidence_matrix()','.laplacian_matrix()',
+			'.spectrum()','.eigenvalues()','.eigenvectors()',
+			'.kirchhoff_matrix()','.weighted_adjacency_matrix()',
+			'.layout()','.plot()','.show()','.save()','.export()',
+			'.automorphism_group()','.is_isomorphic()','.is_subgraph()',
+			'.complement()','.line_graph()','.to_directed()','.to_undirected()'
+		],
+		
+		// String and I/O methods
+		string_io: [
+			'.str()','._repr_()','._latex_()','._ascii_art_()','._sage_input_()',
+			'.save()','.load()','.export()','.write()','.read()',
+			'.nbytes()','.memory_usage()'
+		]
+	};
+  var ALL_WORDS = {};
+  Object.keys(SAGE_WORDS).forEach(function (k) {
+    SAGE_WORDS[k].forEach(function (w) { ALL_WORDS[w] = k; });
+  });
+  var WORD_LIST = Object.keys(ALL_WORDS);
+
+  /* ── Hint Function ──────────────────────────────────────────────── */
+  function sageHint(cm) {
+    var cur = cm.getCursor(), tok = cm.getTokenAt(cur);
+    var word = tok.string.replace(/[^\w]/g, '');
+    var from = { line: cur.line, ch: tok.start };
+    var to   = { line: cur.line, ch: cur.ch };
+    var results = [];
+    if (word.length >= 1) {
+      var lower = word.toLowerCase();
+      WORD_LIST.forEach(function (w) {
+        if (w.toLowerCase().indexOf(lower) === 0 && w !== word)
+          results.push({ text: w, displayText: w,
+            render: function (el, s, d) { el.innerHTML = d.text + '<span class="hint-kind">' + ALL_WORDS[d.text] + '</span>'; }
+          });
+      });
+    }
+    var any = CodeMirror.hint.anyword(cm);
+    if (any && any.list) {
+      any.list.forEach(function (w) {
+        var t = (typeof w === 'string') ? w : w.text;
+        if (!ALL_WORDS[t] && t !== word)
+          results.push({ text: t, displayText: t,
+            render: function (el, s, d) { el.innerHTML = d.text + '<span class="hint-kind">buffer</span>'; }
+          });
+      });
+    }
+    results.sort(function (a, b) { return a.text.localeCompare(b.text); });
+    return { list: results, from: from, to: to };
+  }
+
+	  var editor = CodeMirror(document.getElementById('editor'), {
+	  value: '',
+	  mode: 'python',
+	  theme: 'default',
+	  lineNumbers: true,
+	  indentUnit: 4,
+	  matchBrackets: true,
+	  autoCloseBrackets: true,
+	  extraKeys: {
+		'Shift-Enter': function () { runCode(); },
+		'Ctrl-Space':  function (cm) { cm.showHint({ hint: enhancedSageHint, completeSingle: false }); },
+		'Ctrl-/': function (cm) { cm.toggleComment(); },
+		'Ctrl-\\': function (cm) { cm.toggleComment({ fullLines: false }); },
+		'Ctrl-S': function (cm) { 
+		  downloadProject(); 
+		  return false; // Prevent default browser save
+		},
+		'Cmd-S': function (cm) { 
+		  downloadProject(); 
+		  return false; // Prevent default browser save (Mac)
+		},
+		'Tab': function (cm) {
+		  if (cm.somethingSelected()) cm.indentSelection('add');
+		  else cm.replaceSelection('    ', 'end');
+		}
+	  },
+	  hintOptions: { hint: enhancedSageHint, completeSingle: false }
+	});
+
+	// Update hints on change
+	var hintTimer = null;
+	editor.on('change', function(cm, change) {
+	  if (change.origin !== '+input' && change.origin !== 'setValue') return;
+	  clearTimeout(hintTimer);
+	  hintTimer = setTimeout(function() {
+		// Hints will update on next Ctrl+Space or auto-trigger
+	  }, 300);
+	});
+  var autoTimer = null;
+  editor.on('inputRead', function (cm, change) {
+    if (change.origin !== '+input') return;
+    var tok = cm.getTokenAt(cm.getCursor());
+    var w = tok.string.replace(/[^\w]/g, '');
+    if (w.length >= 2) {
+      clearTimeout(autoTimer);
+      autoTimer = setTimeout(function () {
+        if (!cm.state.completionActive)
+          cm.showHint({ hint: sageHint, completeSingle: false });
+      }, 200);
+    }
+  });
+  editor.on('change', function () {
+    var f = getFile(activeFileId);
+    if (f) f.content = editor.getValue();
+  });
+  
+	  /* ── Dynamic Code Parser ───────────────────────────────────────── */
+	function extractDefinitions(code) {
+	  var defs = {
+		functions: [],
+		classes: [],
+		variables: [],
+		imports: []
+	  };
+	  
+	  // Extract function definitions: def name(...):
+	  var funcRegex = /^\s*def\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/gm;
+	  var match;
+	  while ((match = funcRegex.exec(code)) !== null) {
+		defs.functions.push(match[1] + '()');
+	  }
+	  
+	  // Extract class definitions: class Name:
+	  var classRegex = /^\s*class\s+([a-zA-Z_][a-zA-Z0-9_]*)/gm;
+	  while ((match = classRegex.exec(code)) !== null) {
+		defs.classes.push(match[1]);
+	  }
+	  
+	  // Extract variable assignments: name = ...
+	  var varRegex = /^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*=/gm;
+	  while ((match = varRegex.exec(code)) !== null) {
+		var name = match[1];
+		// Filter out keywords and already-defined functions
+		if (name !== 'def' && name !== 'class' && name !== 'if' && 
+			name !== 'for' && name !== 'while' && name !== 'return' &&
+			defs.functions.indexOf(name + '()') === -1) {
+		  defs.variables.push(name);
+		}
+	  }
+	  
+	  // Extract imports: import x or from x import y
+	  var importRegex = /^\s*(?:from\s+([\w.]+)\s+)?import\s+([\w.*, ]+)/gm;
+	  while ((match = importRegex.exec(code)) !== null) {
+		if (match[2]) {
+		  var imports = match[2].split(',');
+		  imports.forEach(function(imp) {
+			imp = imp.trim().split(' as ').pop().trim();
+			if (imp !== '*') defs.imports.push(imp);
+		  });
+		}
+	  }
+	  
+	  return defs;
+	}
+
+	function getAllDefinitions() {
+	  var allDefs = { functions: [], classes: [], variables: [], imports: [] };
+	  
+	  // Parse all files
+	  files.forEach(function(f) {
+		var defs = extractDefinitions(f.content);
+		allDefs.functions = allDefs.functions.concat(defs.functions);
+		allDefs.classes = allDefs.classes.concat(defs.classes);
+		allDefs.variables = allDefs.variables.concat(defs.variables);
+		allDefs.imports = allDefs.imports.concat(defs.imports);
+	  });
+	  
+	  // Remove duplicates
+	  allDefs.functions = allDefs.functions.filter(function(v, i, a) { return a.indexOf(v) === i; });
+	  allDefs.classes = allDefs.classes.filter(function(v, i, a) { return a.indexOf(v) === i; });
+	  allDefs.variables = allDefs.variables.filter(function(v, i, a) { return a.indexOf(v) === i; });
+	  allDefs.imports = allDefs.imports.filter(function(v, i, a) { return a.indexOf(v) === i; });
+	  
+	  return allDefs;
+	}
+
+	/* ── Enhanced Hint Function ─────────────────────────────────────── */
+	function enhancedSageHint(cm) {
+	  var cur = cm.getCursor();
+	  var tok = cm.getTokenAt(cur);
+	  var word = tok.string.replace(/[^\w]/g, '');
+	  var from = { line: cur.line, ch: tok.start };
+	  var to   = { line: cur.line, ch: cur.ch };
+	  var results = [];
+	  
+	  // Get dynamic definitions
+	  var dynamicDefs = getAllDefinitions();
+	  
+	  // Add dynamic functions
+	  dynamicDefs.functions.forEach(function(f) {
+		if (f.toLowerCase().indexOf(word.toLowerCase()) === 0 && f !== word) {
+		  results.push({ 
+			text: f, 
+			displayText: f,
+			className: 'hint-function',
+			render: function (el, s, d) { 
+			  el.innerHTML = d.text + '<span class="hint-kind">function</span>'; 
+			}
+		  });
+		}
+	  });
+	  
+	  // Add dynamic classes
+	  dynamicDefs.classes.forEach(function(c) {
+		if (c.toLowerCase().indexOf(word.toLowerCase()) === 0 && c !== word) {
+		  results.push({ 
+			text: c, 
+			displayText: c,
+			className: 'hint-class',
+			render: function (el, s, d) { 
+			  el.innerHTML = d.text + '<span class="hint-kind">class</span>'; 
+			}
+		  });
+		}
+	  });
+	  
+	  // Add dynamic variables
+	  dynamicDefs.variables.forEach(function(v) {
+		if (v.toLowerCase().indexOf(word.toLowerCase()) === 0 && v !== word) {
+		  results.push({ 
+			text: v, 
+			displayText: v,
+			className: 'hint-variable',
+			render: function (el, s, d) { 
+			  el.innerHTML = d.text + '<span class="hint-kind">variable</span>'; 
+			}
+		  });
+		}
+	  });
+	  
+	  // Add imports
+	  dynamicDefs.imports.forEach(function(imp) {
+		if (imp.toLowerCase().indexOf(word.toLowerCase()) === 0 && imp !== word) {
+		  results.push({ 
+			text: imp, 
+			displayText: imp,
+			className: 'hint-import',
+			render: function (el, s, d) { 
+			  el.innerHTML = d.text + '<span class="hint-kind">import</span>'; 
+			}
+		  });
+		}
+	  });
+	  
+	  // Add static SageMath keywords
+	  if (word.length >= 1) {
+		var lower = word.toLowerCase();
+		WORD_LIST.forEach(function (w) {
+		  if (w.toLowerCase().indexOf(lower) === 0 && w !== word) {
+			// Check if not already in dynamic results
+			var exists = results.some(function(r) { return r.text === w; });
+			if (!exists) {
+			  results.push({ 
+				text: w, 
+				displayText: w,
+				render: function (el, s, d) { 
+				  el.innerHTML = d.text + '<span class="hint-kind">' + ALL_WORDS[d.text] + '</span>'; 
+				}
+			  });
+			}
+		  }
+		});
+	  }
+	  
+	  // Add anyword hints
+	  var any = CodeMirror.hint.anyword(cm);
+	  if (any && any.list) {
+		any.list.forEach(function (w) {
+		  var t = (typeof w === 'string') ? w : w.text;
+		  if (!ALL_WORDS[t] && t !== word) {
+			var exists = results.some(function(r) { return r.text === t; });
+			if (!exists) {
+			  results.push({ 
+				text: t, 
+				displayText: t,
+				render: function (el, s, d) { 
+				  el.innerHTML = d.text + '<span class="hint-kind">buffer</span>'; 
+				}
+			  });
+			}
+		  }
+		});
+	  }
+	  
+	  // Sort: functions first, then classes, then variables, then alphabetically
+	  results.sort(function (a, b) {
+		var orderA = a.className === 'hint-function' ? 0 : 
+					 a.className === 'hint-class' ? 1 : 
+					 a.className === 'hint-variable' ? 2 : 3;
+		var orderB = b.className === 'hint-function' ? 0 : 
+					 b.className === 'hint-class' ? 1 : 
+					 b.className === 'hint-variable' ? 2 : 3;
+		if (orderA !== orderB) return orderA - orderB;
+		return a.text.localeCompare(b.text);
+	  });
+	  
+	  return { list: results, from: from, to: to };
+	}
+
+  /* ── File Helpers ───────────────────────────────────────────────── */
+  function getFile(id) { return files.find(function (f) { return f.id === id; }); }
+
+  function saveActiveFile() {
+    var f = getFile(activeFileId);
+    if (f) f.content = editor.getValue();
+  }
+
+  function switchToFile(id) {
+    saveActiveFile();
+    activeFileId = id;
+    var f = getFile(id);
+    if (f) editor.setValue(f.content);
+    renderTabs();
+    editor.focus();
+  }
+
+  function addFile(name) {
+    fileCounter++;
+    var id = 'file_' + fileCounter + '_' + Date.now();
+    var fname = name || 'untitled_' + fileCounter + '.sage';
+    files.push({ id: id, name: fname, content: '# ' + fname + '\n', isMain: false });
+    switchToFile(id);
+  }
+
+  function removeFile(id) {
+    var idx = files.findIndex(function (f) { return f.id === id; });
+    if (idx === -1) return;
+    files.splice(idx, 1);
+    if (activeFileId === id) switchToFile('main');
+    else renderTabs();
+  }
+
+  function escHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+  /* ── Drag & Drop ────────────────────────────────────────────────── */
+  function handleDragStart(e) {
+    draggedFileId = this.dataset.id;
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', this.dataset.id);
+  }
+  function handleDragOver(e) {
+    if (!draggedFileId || this.dataset.id === draggedFileId) return;
+    var f = getFile(this.dataset.id);
+    if (!f || f.isMain) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    var rect = this.getBoundingClientRect();
+    var mid  = rect.left + rect.width / 2;
+    if (e.clientX < mid) {
+      this.classList.add('drag-over-left');
+      this.classList.remove('drag-over-right');
+    } else {
+      this.classList.remove('drag-over-left');
+      this.classList.add('drag-over-right');
+    }
+  }
+  function handleDragLeave() { this.classList.remove('drag-over-left', 'drag-over-right'); }
+  function handleDrop(e) {
+    e.preventDefault();
+    var tid = this.dataset.id, tf = getFile(tid);
+    this.classList.remove('drag-over-left', 'drag-over-right');
+    if (!tf || tf.isMain || !draggedFileId || draggedFileId === tid) return;
+    var rect = this.getBoundingClientRect();
+    var before = e.clientX < rect.left + rect.width / 2;
+    var fromIdx = files.findIndex(function (f) { return f.id === draggedFileId; });
+    if (fromIdx === -1) return;
+    var item = files.splice(fromIdx, 1)[0];
+    var toIdx = files.findIndex(function (f) { return f.id === tid; });
+    if (!before) toIdx++;
+    files.splice(toIdx, 0, item);
+    draggedFileId = null;
+    renderTabs();
+  }
+  function handleDragEnd() {
+    draggedFileId = null;
+    document.querySelectorAll('.file-tab').forEach(function (t) {
+      t.classList.remove('dragging', 'drag-over-left', 'drag-over-right');
+    });
+  }
+
+  /* ── Render Tabs ────────────────────────────────────────────────── */
+  function renderTabs() {
+    var bar = document.getElementById('file-tabs-bar');
+    var addBtn = document.getElementById('add-tab-btn');
+    bar.querySelectorAll('.file-tab').forEach(function (t) { t.remove(); });
+
+    files.forEach(function (f) {
+      var tab = document.createElement('div');
+      tab.className = 'file-tab' + (f.id === activeFileId ? ' active' : '') + (f.isMain ? ' main-tab' : '');
+      tab.dataset.id = f.id;
+      tab.innerHTML =
+        '<svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' +
+        '<span class="tab-name">' + escHtml(f.name) + '</span>' +
+        (f.isMain ? '<span class="tab-badge">entry</span>' : '') +
+        '<span class="tab-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></span>';
+
+      tab.addEventListener('click', function (e) {
+        if (e.target.closest('.tab-close')) return;
+        switchToFile(f.id);
+      });
+      tab.addEventListener('dblclick', function (e) {
+        if (e.target.closest('.tab-close')) return;
+        openRenameModal(f.id);
+      });
+
+      if (!f.isMain) {
+        tab.querySelector('.tab-close').addEventListener('click', function (e) {
+          e.stopPropagation();
+          removeFile(f.id);
+        });
+        tab.draggable = true;
+        tab.addEventListener('dragstart', handleDragStart);
+        tab.addEventListener('dragover', handleDragOver);
+        tab.addEventListener('dragleave', handleDragLeave);
+        tab.addEventListener('drop', handleDrop);
+        tab.addEventListener('dragend', handleDragEnd);
+      }
+      bar.insertBefore(tab, addBtn);
+    });
+    updateRunOrder();
+  }
+
+  function updateRunOrder() {
+    var helpers = files.filter(function (f) { return !f.isMain; });
+    var parts = helpers.map(function (f) { return f.name; });
+    var mainFile = getFile('main');
+    parts.push(mainFile ? mainFile.name : 'main.sage');
+    document.getElementById('run-order-text').innerHTML =
+      parts.map(function (n) { return '<em>' + escHtml(n) + '</em>'; }).join(' → ');
+  }
+
+  /* ── Rename Modal ───────────────────────────────────────────────── */
+  var renameFileId = null;
+  var renameModal  = document.getElementById('rename-modal');
+  var renameInput  = document.getElementById('rename-input');
+
+  function openRenameModal(id) {
+    var f = getFile(id); if (!f) return;
+    renameFileId = id;
+    renameInput.value = f.name;
+    renameModal.classList.add('open');
+    setTimeout(function () { renameInput.focus(); renameInput.select(); }, 50);
+  }
+  function closeRenameModal() { renameModal.classList.remove('open'); renameFileId = null; }
+  function doRename() {
+    if (!renameFileId) return;
+    var val = renameInput.value.trim();
+    if (!val) { closeRenameModal(); return; }
+    if (!val.endsWith('.sage') && !val.endsWith('.py')) val += '.sage';
+    var f = getFile(renameFileId);
+    if (f) f.name = val;
+    closeRenameModal();
+    renderTabs();
+  }
+  document.getElementById('rename-cancel').addEventListener('click', closeRenameModal);
+  document.getElementById('rename-save').addEventListener('click', doRename);
+  renameInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') doRename();
+    if (e.key === 'Escape') closeRenameModal();
+  });
+  renameModal.addEventListener('click', function (e) { if (e.target === renameModal) closeRenameModal(); });
+
+  /* ── Toast ──────────────────────────────────────────────────────── */
+  function showToast(msg, type) {
+    var el = document.createElement('div');
+    el.className = 'toast' + (type === 'error' ? ' toast-error' : '') + (type === 'success' ? ' toast-success' : '');
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(function () { el.classList.add('show'); }, 20);
+    setTimeout(function () {
+      el.classList.remove('show');
+      setTimeout(function () { el.remove(); }, 300);
+    }, 2800);
+  }
+
+  /* ── Theme Toggle ───────────────────────────────────────────────── */
+  document.getElementById('theme-btn').addEventListener('click', function () {
+    isDark = !isDark;
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    editor.setOption('theme', isDark ? 'dracula' : 'default');
+    document.getElementById('icon-moon').style.display = isDark ? 'none' : '';
+    document.getElementById('icon-sun').style.display  = isDark ? '' : 'none';
+  });
+
+  /* ── Download Project (JSON) ────────────────────────────────────── */
+	function downloadProject() {
+	  saveActiveFile();
+	  var helpers  = files.filter(function (f) { return !f.isMain; });
+	  var mainFile = getFile('main');
+	  var ordered  = [];
+
+	  helpers.forEach(function (f, i) {
+		ordered.push({ order: i + 1, name: f.name, content: f.content, isMain: false });
+	  });
+	  ordered.push({ order: ordered.length + 1, name: mainFile.name, content: mainFile.content, isMain: true });
+
+	  var data = { sagecell_project: true, version: 1, fileCount: ordered.length, files: ordered };
+	  var json = JSON.stringify(data, null, 2);
+
+	  // Generate timestamp
+	  var now = new Date();
+	  var timestamp = now.getFullYear() +
+					  String(now.getMonth() + 1).padStart(2, '0') +
+					  String(now.getDate()).padStart(2, '0') +
+					  '_' +
+					  String(now.getHours()).padStart(2, '0') +
+					  String(now.getMinutes()).padStart(2, '0') +
+					  String(now.getSeconds()).padStart(2, '0');
+
+	  // Get base name from main file (remove .sage or .py extension)
+	  var baseName = 'sage_project';  // fallback
+	  if (mainFile && mainFile.name) {
+		baseName = mainFile.name.replace(/\.(sage|py)$/i, '');
+	  }
+
+	  // Sanitize filename (remove/replace invalid characters)
+	  baseName = baseName.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+	  var blob = new Blob([json], { type: 'application/json' });
+	  var a = document.createElement('a');
+	  a.href = URL.createObjectURL(blob);
+	  a.download = baseName + '_' + timestamp + '.json';
+	  document.body.appendChild(a);
+	  a.click();
+	  document.body.removeChild(a);
+	  URL.revokeObjectURL(a.href);
+
+	  showToast('Saved ' + baseName + '_' + timestamp + '.json', 'success');
+	}
+  /* ── Upload Project (JSON) ──────────────────────────────────────── */
+  function uploadProject(file) {
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      try {
+        var data = JSON.parse(ev.target.result);
+        if (!data.sagecell_project || !Array.isArray(data.files) || data.files.length === 0) {
+          showToast('Invalid project file — expected sagecell_project JSON', 'error');
+          return;
+        }
+
+        /* Separate main from helpers */
+        var mainEntry    = null;
+        var helperEntries = [];
+        /* Sort by order field if present */
+        var sorted = data.files.slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
+
+        sorted.forEach(function (f) {
+          if (f.isMain) mainEntry = f;
+          else helperEntries.push(f);
+        });
+
+        /* Rebuild file list: main at index 0, helpers after */
+        files = [];
+        fileCounter = 0;
+
+        files.push({
+          id: 'main',
+          name: (mainEntry && mainEntry.name) || 'main.sage',
+          content: (mainEntry && typeof mainEntry.content === 'string') ? mainEntry.content : '# main.sage\n',
+          isMain: true
+        });
+
+        helperEntries.forEach(function (f) {
+          fileCounter++;
+          files.push({
+            id: 'file_' + fileCounter + '_' + Date.now() + '_' + fileCounter,
+            name: f.name || ('untitled_' + fileCounter + '.sage'),
+            content: (typeof f.content === 'string') ? f.content : '',
+            isMain: false
+          });
+        });
+
+        activeFileId = 'main';
+        editor.setValue(files[0].content);
+        renderTabs();
+        showToast('Loaded ' + files.length + ' file' + (files.length > 1 ? 's' : '') + ' from ' + file.name, 'success');
+      } catch (err) {
+        showToast('Error reading file: ' + err.message, 'error');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  /* ── Wire Buttons ───────────────────────────────────────────────── */
+  document.getElementById('add-tab-btn').addEventListener('click', function () { addFile(); });
+  document.getElementById('download-btn').addEventListener('click', downloadProject);
+  document.getElementById('upload-btn').addEventListener('click', function () {
+    document.getElementById('file-upload-input').click();
+  });
+  document.getElementById('file-upload-input').addEventListener('change', function (e) {
+    var f = e.target.files[0];
+    if (f) uploadProject(f);
+    this.value = '';
+  });
+
+  /* ── Run Code ───────────────────────────────────────────────────── */
+  function runCode() {
+    saveActiveFile();
+    var helpers  = files.filter(function (f) { return !f.isMain; });
+    var mainFile = getFile('main');
+    var parts    = [];
+
+    helpers.forEach(function (f) {
+      parts.push('# ── ' + f.name + ' ──');
+      parts.push(f.content);
+    });
+    parts.push('# ── ' + mainFile.name + ' ──');
+    parts.push(mainFile.content);
+
+    var code = parts.join('\n\n');
+    if (!code.trim()) return;
+
+    var es = document.getElementById('empty-state');
+    if (es) es.style.display = 'none';
+
+    var ta = document.querySelector('#sagecell-hidden .sagecell_commands');
+    if (ta) { ta.value = code; ta.dispatchEvent(new Event('change')); }
+    var cmEl = document.querySelector('#sagecell-hidden .CodeMirror');
+    if (cmEl && cmEl.CodeMirror) cmEl.CodeMirror.setValue(code);
+    var btn = document.querySelector('#sagecell-hidden .sagecell_evalButton');
+    if (btn) btn.click();
+  }
+
+  document.getElementById('run').addEventListener('click', runCode);
+
+  document.getElementById('clear').addEventListener('click', function () {
+    document.getElementById('output').innerHTML =
+      '<div class="empty-state" id="empty-state">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:40px;height:40px;opacity:0.4"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>' +
+      '<p>Run your code to see results here</p></div>';
+  });
+  
+  // Global Ctrl+S handler (works even when not in editor)
+// document.addEventListener('keydown', function(e) {
+//  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+//	e.preventDefault();
+//	e.stopPropagation();
+//	downloadProject();
+//	return false;
+//  }
+//});
+
+  /* ── Init ───────────────────────────────────────────────────────── */
+  renderTabs();
+  switchToFile('main');
+
+})();
+</script>
+
+
+
+</body></html>
