@@ -19,9 +19,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
 
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
 
-  <script src="https://sage-sk.org/static/embedded_sagecell.js"></script>
+  <script src="https://sagecell.sagemath.org/static/embedded_sagecell.js"></script>
 
   <style>
     /* ── Theme Variables ── */
@@ -114,7 +114,7 @@
     .topbar-right { display: flex; align-items: center; gap: 0.4em; }
     .btn-sep { width: 1px; height: 20px; background: var(--border); margin: 0 0.1em; }
 
-    /* ── Buttons ── */
+    /* ── Buttons ─ */
     .run-btn {
       padding: 0.4em 1.2em;
       background: linear-gradient(135deg, #8B5CF6, #a78bfa);
@@ -170,7 +170,7 @@
     .file-tab {
       display: flex; align-items: center; gap: 0.35em;
       padding: 0 0.65em; font-size: 0.72rem;
-      font-family: 'JetBrains Mono', monospace; color: var(--text-3);
+      color: var(--text-3);
       cursor: pointer; border-right: 1px solid var(--border);
       white-space: nowrap; position: relative;
       transition: background 0.15s, color 0.15s; user-select: none;
@@ -241,8 +241,7 @@
     .editor-wrap { flex: 1; overflow: hidden; }
     .editor-wrap .CodeMirror {
       height: 100%;
-      font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
-      font-size: 13.5px; line-height: 1.6; padding-top: 0.3em;
+      font-size: 16px; line-height: 1.6; padding-top: 0.3em;
       background: var(--bg-editor) !important;
     }
     .editor-wrap .CodeMirror-gutters {
@@ -283,8 +282,7 @@
     #output pre, #output .sagecell_output pre {
       color: var(--text) !important;
       background: transparent !important;
-      font-family: 'JetBrains Mono', monospace !important;
-      font-size: 13px !important;
+      font-size: 17px !important;
       white-space: pre-wrap; word-break: break-word;
     }
     #output .sagecell_output_error pre { color: var(--error-text) !important; }
@@ -300,7 +298,7 @@
 
     /* ── Autocomplete ── */
     .CodeMirror-hints {
-      font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+      font-size: 12.5px;
       max-height: 220px; border: 1px solid var(--border); border-radius: 6px;
       box-shadow: var(--shadow); background: var(--bg-surface);
       color: var(--text); z-index: 200; padding: 3px;
@@ -330,7 +328,7 @@
       width: 100%; padding: 0.5em 0.7em;
       background: var(--bg-body); border: 1px solid var(--border);
       border-radius: 6px; color: var(--text);
-      font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; outline: none;
+      font-size: 0.85rem; outline: none;
     }
     .modal input[type="text"]:focus { border-color: var(--border-focus); }
     .modal-actions { display: flex; justify-content: flex-end; gap: 0.5em; margin-top: 1em; }
@@ -398,38 +396,6 @@
 	.sagecell_poweredBy {
 		display: none !important;
 	}
-	/* Hint type indicators */
-	.hint-function { color: var(--accent-text); }
-	.hint-class { color: #f59e0b; }
-	.hint-variable { color: #22c55e; }
-	.hint-import { color: #ec4899; }
-
-	.CodeMirror-hint { 
-	  padding: 3px 8px; 
-	  border-radius: 3px; 
-	  white-space: nowrap;
-	  display: flex;
-	  justify-content: space-between;
-	  align-items: center;
-	}
-
-	li.CodeMirror-hint-active { 
-	  background: var(--accent); 
-	  color: #fff; 
-	}
-
-	.hint-kind { 
-	  float: right; 
-	  margin-left: 2em; 
-	  font-size: 0.75em; 
-	  opacity: 0.5;
-	  text-transform: uppercase;
-	  letter-spacing: 0.05em;
-	}
-
-	li.CodeMirror-hint-active .hint-kind { 
-	  opacity: 0.8; 
-	}
   </style>
 
   <script>
@@ -446,7 +412,7 @@
   </script>
 
 <!-- ── Top Bar ── -->
-<div class="topbar">
+</head><body><div class="topbar">
   <div class="topbar-left">
     <div class="logo">S</div>
     <h1>Sage<span>Cell</span> IDE</h1>
@@ -547,12 +513,12 @@
 
 <!-- ── Footer ─ -->
 <div class="footer">
-  <span>© 2026 Dominik Borovský & Jozef Hanč </span>
+  <span>© 2026 Dominik Borovský &amp; Jozef Hanč </span>
   <span class="footer-sep">·</span>
   <a href="https://www.sagemath.org" target="_blank" rel="noopener">Powered by SageMath</a>
 </div>
-</head>
-<body>
+
+
 
 <script>
 (function () {
@@ -1051,254 +1017,43 @@
     return { list: results, from: from, to: to };
   }
 
-	  var editor = CodeMirror(document.getElementById('editor'), {
-	  value: '',
-	  mode: 'python',
-	  theme: 'default',
-	  lineNumbers: true,
-	  indentUnit: 4,
-	  matchBrackets: true,
-	  autoCloseBrackets: true,
-	  extraKeys: {
-		'Shift-Enter': function () { runCode(); },
-		'Ctrl-Space':  function (cm) { cm.showHint({ hint: enhancedSageHint, completeSingle: false }); },
-		'Ctrl-/': function (cm) { cm.toggleComment(); },
-		'Ctrl-\\': function (cm) { cm.toggleComment({ fullLines: false }); },
-		'Ctrl-S': function (cm) { 
-		  downloadProject(); 
-		  return false; // Prevent default browser save
-		},
-		'Cmd-S': function (cm) { 
-		  downloadProject(); 
-		  return false; // Prevent default browser save (Mac)
-		},
-		'Tab': function (cm) {
-		  if (cm.somethingSelected()) cm.indentSelection('add');
-		  else cm.replaceSelection('    ', 'end');
-		}
-	  },
-	  hintOptions: { hint: enhancedSageHint, completeSingle: false }
-	});
-
-	// Update hints on change
-	var hintTimer = null;
-	editor.on('change', function(cm, change) {
-	  if (change.origin !== '+input' && change.origin !== 'setValue') return;
-	  clearTimeout(hintTimer);
-	  hintTimer = setTimeout(function() {
-		// Hints will update on next Ctrl+Space or auto-trigger
-	  }, 300);
-	});
-  var autoTimer = null;
-  editor.on('inputRead', function (cm, change) {
-    if (change.origin !== '+input') return;
-    var tok = cm.getTokenAt(cm.getCursor());
-    var w = tok.string.replace(/[^\w]/g, '');
-    if (w.length >= 2) {
-      clearTimeout(autoTimer);
-      autoTimer = setTimeout(function () {
-        if (!cm.state.completionActive)
-          cm.showHint({ hint: sageHint, completeSingle: false });
-      }, 200);
-    }
+  /* ── CodeMirror ─────────────────────────────────────────────────── */
+  var editor = CodeMirror(document.getElementById('editor'), {
+    value: '',
+    mode: 'python',
+    theme: 'default',            /* light by default */
+    lineNumbers: true,
+    indentUnit: 4,
+    tabSize: 4,
+    smartIndent: true,
+    indentWithTabs: false,
+    matchBrackets: true,
+    autoCloseBrackets: true,
+    extraKeys: {
+      'Shift-Enter': function () { runCode(); },
+      'Ctrl-Space':  function (cm) { cm.showHint({ hint: sageHint, completeSingle: false }); },
+      'Ctrl-/': function (cm) { cm.toggleComment(); },
+      'Ctrl-\\': function (cm) { cm.toggleComment({ fullLines: false }); },
+      'Tab': function (cm) {
+        if (cm.somethingSelected()) {
+          cm.indentSelection('add');
+        } else {
+          cm.execCommand('insertSoftTab');
+        }
+      },
+      'Shift-Tab': function (cm) {
+        cm.indentSelection('subtract');
+      }
+    },
+    hintOptions: { hint: sageHint, completeSingle: false }
   });
+
+  /* Removed automatic autocomplete - now only triggered by Ctrl+Space */
+
   editor.on('change', function () {
     var f = getFile(activeFileId);
     if (f) f.content = editor.getValue();
   });
-  
-	  /* ── Dynamic Code Parser ───────────────────────────────────────── */
-	function extractDefinitions(code) {
-	  var defs = {
-		functions: [],
-		classes: [],
-		variables: [],
-		imports: []
-	  };
-	  
-	  // Extract function definitions: def name(...):
-	  var funcRegex = /^\s*def\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/gm;
-	  var match;
-	  while ((match = funcRegex.exec(code)) !== null) {
-		defs.functions.push(match[1] + '()');
-	  }
-	  
-	  // Extract class definitions: class Name:
-	  var classRegex = /^\s*class\s+([a-zA-Z_][a-zA-Z0-9_]*)/gm;
-	  while ((match = classRegex.exec(code)) !== null) {
-		defs.classes.push(match[1]);
-	  }
-	  
-	  // Extract variable assignments: name = ...
-	  var varRegex = /^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*=/gm;
-	  while ((match = varRegex.exec(code)) !== null) {
-		var name = match[1];
-		// Filter out keywords and already-defined functions
-		if (name !== 'def' && name !== 'class' && name !== 'if' && 
-			name !== 'for' && name !== 'while' && name !== 'return' &&
-			defs.functions.indexOf(name + '()') === -1) {
-		  defs.variables.push(name);
-		}
-	  }
-	  
-	  // Extract imports: import x or from x import y
-	  var importRegex = /^\s*(?:from\s+([\w.]+)\s+)?import\s+([\w.*, ]+)/gm;
-	  while ((match = importRegex.exec(code)) !== null) {
-		if (match[2]) {
-		  var imports = match[2].split(',');
-		  imports.forEach(function(imp) {
-			imp = imp.trim().split(' as ').pop().trim();
-			if (imp !== '*') defs.imports.push(imp);
-		  });
-		}
-	  }
-	  
-	  return defs;
-	}
-
-	function getAllDefinitions() {
-	  var allDefs = { functions: [], classes: [], variables: [], imports: [] };
-	  
-	  // Parse all files
-	  files.forEach(function(f) {
-		var defs = extractDefinitions(f.content);
-		allDefs.functions = allDefs.functions.concat(defs.functions);
-		allDefs.classes = allDefs.classes.concat(defs.classes);
-		allDefs.variables = allDefs.variables.concat(defs.variables);
-		allDefs.imports = allDefs.imports.concat(defs.imports);
-	  });
-	  
-	  // Remove duplicates
-	  allDefs.functions = allDefs.functions.filter(function(v, i, a) { return a.indexOf(v) === i; });
-	  allDefs.classes = allDefs.classes.filter(function(v, i, a) { return a.indexOf(v) === i; });
-	  allDefs.variables = allDefs.variables.filter(function(v, i, a) { return a.indexOf(v) === i; });
-	  allDefs.imports = allDefs.imports.filter(function(v, i, a) { return a.indexOf(v) === i; });
-	  
-	  return allDefs;
-	}
-
-	/* ── Enhanced Hint Function ─────────────────────────────────────── */
-	function enhancedSageHint(cm) {
-	  var cur = cm.getCursor();
-	  var tok = cm.getTokenAt(cur);
-	  var word = tok.string.replace(/[^\w]/g, '');
-	  var from = { line: cur.line, ch: tok.start };
-	  var to   = { line: cur.line, ch: cur.ch };
-	  var results = [];
-	  
-	  // Get dynamic definitions
-	  var dynamicDefs = getAllDefinitions();
-	  
-	  // Add dynamic functions
-	  dynamicDefs.functions.forEach(function(f) {
-		if (f.toLowerCase().indexOf(word.toLowerCase()) === 0 && f !== word) {
-		  results.push({ 
-			text: f, 
-			displayText: f,
-			className: 'hint-function',
-			render: function (el, s, d) { 
-			  el.innerHTML = d.text + '<span class="hint-kind">function</span>'; 
-			}
-		  });
-		}
-	  });
-	  
-	  // Add dynamic classes
-	  dynamicDefs.classes.forEach(function(c) {
-		if (c.toLowerCase().indexOf(word.toLowerCase()) === 0 && c !== word) {
-		  results.push({ 
-			text: c, 
-			displayText: c,
-			className: 'hint-class',
-			render: function (el, s, d) { 
-			  el.innerHTML = d.text + '<span class="hint-kind">class</span>'; 
-			}
-		  });
-		}
-	  });
-	  
-	  // Add dynamic variables
-	  dynamicDefs.variables.forEach(function(v) {
-		if (v.toLowerCase().indexOf(word.toLowerCase()) === 0 && v !== word) {
-		  results.push({ 
-			text: v, 
-			displayText: v,
-			className: 'hint-variable',
-			render: function (el, s, d) { 
-			  el.innerHTML = d.text + '<span class="hint-kind">variable</span>'; 
-			}
-		  });
-		}
-	  });
-	  
-	  // Add imports
-	  dynamicDefs.imports.forEach(function(imp) {
-		if (imp.toLowerCase().indexOf(word.toLowerCase()) === 0 && imp !== word) {
-		  results.push({ 
-			text: imp, 
-			displayText: imp,
-			className: 'hint-import',
-			render: function (el, s, d) { 
-			  el.innerHTML = d.text + '<span class="hint-kind">import</span>'; 
-			}
-		  });
-		}
-	  });
-	  
-	  // Add static SageMath keywords
-	  if (word.length >= 1) {
-		var lower = word.toLowerCase();
-		WORD_LIST.forEach(function (w) {
-		  if (w.toLowerCase().indexOf(lower) === 0 && w !== word) {
-			// Check if not already in dynamic results
-			var exists = results.some(function(r) { return r.text === w; });
-			if (!exists) {
-			  results.push({ 
-				text: w, 
-				displayText: w,
-				render: function (el, s, d) { 
-				  el.innerHTML = d.text + '<span class="hint-kind">' + ALL_WORDS[d.text] + '</span>'; 
-				}
-			  });
-			}
-		  }
-		});
-	  }
-	  
-	  // Add anyword hints
-	  var any = CodeMirror.hint.anyword(cm);
-	  if (any && any.list) {
-		any.list.forEach(function (w) {
-		  var t = (typeof w === 'string') ? w : w.text;
-		  if (!ALL_WORDS[t] && t !== word) {
-			var exists = results.some(function(r) { return r.text === t; });
-			if (!exists) {
-			  results.push({ 
-				text: t, 
-				displayText: t,
-				render: function (el, s, d) { 
-				  el.innerHTML = d.text + '<span class="hint-kind">buffer</span>'; 
-				}
-			  });
-			}
-		  }
-		});
-	  }
-	  
-	  // Sort: functions first, then classes, then variables, then alphabetically
-	  results.sort(function (a, b) {
-		var orderA = a.className === 'hint-function' ? 0 : 
-					 a.className === 'hint-class' ? 1 : 
-					 a.className === 'hint-variable' ? 2 : 3;
-		var orderB = b.className === 'hint-function' ? 0 : 
-					 b.className === 'hint-class' ? 1 : 
-					 b.className === 'hint-variable' ? 2 : 3;
-		if (orderA !== orderB) return orderA - orderB;
-		return a.text.localeCompare(b.text);
-	  });
-	  
-	  return { list: results, from: from, to: to };
-	}
 
   /* ── File Helpers ───────────────────────────────────────────────── */
   function getFile(id) { return files.find(function (f) { return f.id === id; }); }
@@ -1487,50 +1242,30 @@
   });
 
   /* ── Download Project (JSON) ────────────────────────────────────── */
-	function downloadProject() {
-	  saveActiveFile();
-	  var helpers  = files.filter(function (f) { return !f.isMain; });
-	  var mainFile = getFile('main');
-	  var ordered  = [];
+  function downloadProject() {
+    saveActiveFile();
+    var helpers  = files.filter(function (f) { return !f.isMain; });
+    var mainFile = getFile('main');
+    var ordered  = [];
 
-	  helpers.forEach(function (f, i) {
-		ordered.push({ order: i + 1, name: f.name, content: f.content, isMain: false });
-	  });
-	  ordered.push({ order: ordered.length + 1, name: mainFile.name, content: mainFile.content, isMain: true });
+    helpers.forEach(function (f, i) {
+      ordered.push({ order: i + 1, name: f.name, content: f.content, isMain: false });
+    });
+    ordered.push({ order: ordered.length + 1, name: mainFile.name, content: mainFile.content, isMain: true });
 
-	  var data = { sagecell_project: true, version: 1, fileCount: ordered.length, files: ordered };
-	  var json = JSON.stringify(data, null, 2);
+    var data = { sagecell_project: true, version: 1, fileCount: ordered.length, files: ordered };
+    var json = JSON.stringify(data, null, 2);
+    var blob = new Blob([json], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'sage_project.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    showToast('Saved sage_project.json (' + ordered.length + ' files)', 'success');
+  }
 
-	  // Generate timestamp
-	  var now = new Date();
-	  var timestamp = now.getFullYear() +
-					  String(now.getMonth() + 1).padStart(2, '0') +
-					  String(now.getDate()).padStart(2, '0') +
-					  '_' +
-					  String(now.getHours()).padStart(2, '0') +
-					  String(now.getMinutes()).padStart(2, '0') +
-					  String(now.getSeconds()).padStart(2, '0');
-
-	  // Get base name from main file (remove .sage or .py extension)
-	  var baseName = 'sage_project';  // fallback
-	  if (mainFile && mainFile.name) {
-		baseName = mainFile.name.replace(/\.(sage|py)$/i, '');
-	  }
-
-	  // Sanitize filename (remove/replace invalid characters)
-	  baseName = baseName.replace(/[^a-zA-Z0-9_-]/g, '_');
-
-	  var blob = new Blob([json], { type: 'application/json' });
-	  var a = document.createElement('a');
-	  a.href = URL.createObjectURL(blob);
-	  a.download = baseName + '_' + timestamp + '.json';
-	  document.body.appendChild(a);
-	  a.click();
-	  document.body.removeChild(a);
-	  URL.revokeObjectURL(a.href);
-
-	  showToast('Saved ' + baseName + '_' + timestamp + '.json', 'success');
-	}
   /* ── Upload Project (JSON) ──────────────────────────────────────── */
   function uploadProject(file) {
     var reader = new FileReader();
@@ -1633,16 +1368,6 @@
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:40px;height:40px;opacity:0.4"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>' +
       '<p>Run your code to see results here</p></div>';
   });
-  
-  // Global Ctrl+S handler (works even when not in editor)
-// document.addEventListener('keydown', function(e) {
-//  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-//	e.preventDefault();
-//	e.stopPropagation();
-//	downloadProject();
-//	return false;
-//  }
-//});
 
   /* ── Init ───────────────────────────────────────────────────────── */
   renderTabs();
@@ -1650,6 +1375,7 @@
 
 })();
 </script>
+
 
 
 
