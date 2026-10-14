@@ -12,7 +12,7 @@
       --text: #1e293b;
       --text-2: #475569;
       --text-3: #94a3b8;
-      --text-4: #cbd5e1;
+      --text-4: #a7aeb7;
       --accent: #6366f1;
       --accent-text: #6366f1;
       --accent-tab: #6366f1;
@@ -37,11 +37,11 @@
       --bg-editor: #0f172a;
       --bg-gutter: #1e293b;
       --bg-overlay: rgba(0,0,0,0.55);
-      --border: #334155;
+      --border: #475569;
       --text: #e2e8f0;
-      --text-2: #94a3b8;
+      --text-2: #a8b3c5;
       --text-3: #64748b;
-      --text-4: #475569;
+      --text-4: #94a3b8;
       --accent-text: #818cf8;
       --accent-tab: #c4b5fd;
       --accent-soft: rgba(99,102,241,0.15);
@@ -127,12 +127,7 @@
     }
     .icon-btn:hover .btn-label { display: block; }
 
-    /* ── Main Layout ── */
-    .main { display: flex; flex: 1; min-height: 0; }
-    .panel-editor {
-      width: 50%; display: flex; flex-direction: column;
-      border-right: 1px solid var(--border); min-width: 0;
-    }
+    /* ── Main Layout: grid rules appended at the end of this file ── */
 
     /* ── File Tabs ── */
     .file-tabs-bar {
@@ -149,8 +144,6 @@
       white-space: nowrap; position: relative;
       transition: background 0.15s, color 0.15s; user-select: none;
     }
-    .file-tab:not(.main-tab) { cursor: grab; }
-    .file-tab:not(.main-tab):active { cursor: grabbing; }
     .file-tab:hover { background: var(--bg-hover); color: var(--text-2); }
     .file-tab.active {
       background: var(--tab-active-bg);
@@ -173,18 +166,6 @@
       font-size: 0.58rem; background: var(--badge-bg); color: var(--badge-text);
       padding: 0 0.35em; border-radius: 3px; line-height: 1.5; flex-shrink: 0;
     }
-    /* Drag indicators */
-    .file-tab.dragging { opacity: 0.3; }
-    .file-tab.drag-over-left::before {
-      content: ''; position: absolute;
-      left: -1px; top: 4px; bottom: 4px;
-      width: 2.5px; background: var(--accent); border-radius: 2px; z-index: 5;
-    }
-    .file-tab.drag-over-right::after {
-      content: ''; position: absolute;
-      right: -1px; top: 4px; bottom: 4px;
-      width: 2.5px; background: var(--accent); border-radius: 2px; z-index: 5;
-    }
     .tab-add-btn {
       display: flex; align-items: center; justify-content: center;
       width: 32px; min-width: 32px; cursor: pointer;
@@ -203,7 +184,6 @@
     }
     .panel-info .run-order { color: var(--text-3); }
     .panel-info .run-order em { color: var(--accent-text); font-style: normal; }
-    .drag-hint { color: var(--text-4); font-style: italic; }
     .shortcuts { margin-left: auto; font-size: 0.68rem; color: var(--text-4); }
     .shortcuts kbd {
       background: var(--bg-hover); padding: 0.1em 0.35em; border-radius: 3px;
@@ -233,7 +213,6 @@
     [data-theme="light"] .editor-wrap .CodeMirror-focused .CodeMirror-selected { background: #d7d4f0 !important; }
 
     /* ── Output Panel ── */
-    .panel-output { width: 50%; display: flex; flex-direction: column; min-width: 0; }
     .panel-header {
       display: flex; align-items: center; gap: 0.45em;
       padding: 0.45em 1em; background: var(--bg-surface);
@@ -261,6 +240,45 @@
     }
     #output .sagecell_output_error pre { color: var(--error-text) !important; }
     #output img { max-width: 100%; border-radius: 6px; margin: 0.3em 0; }
+
+    /* SageCell session text - without this the embedded cell paints its own
+       (light) colors and black text lands on the dark panel in dark mode */
+    #output .sagecell_sessionOutput,
+    #output .sagecell_sessionOutput pre { color: var(--text) !important; }
+    #output .sagecell_output_elements { background: transparent; }
+
+    /* ── DataFrame tables (SageCell renders these from print(df.to_html())) ──
+       Ported from nbplayer24.css, re-based onto the IDE theme vars so both
+       light and dark keep readable: header uses --accent, body follows
+       --bg-body/--text, hover uses --bg-hover (not nbplayer's blue). */
+    #output table.dataframe {
+      width: 100%; max-width: 800px;
+      border-collapse: separate; border-spacing: 0;
+      margin: 1em 0; font-size: .85rem;
+      color: var(--text); background-color: var(--bg-body);
+      border: 1px solid var(--border); border-radius: 8px;
+      overflow: hidden; box-shadow: var(--shadow);
+    }
+    #output table.dataframe thead th {
+      background-color: var(--accent); color: #fff;
+      font-weight: 600; text-align: left; padding: 10px 14px;
+      border-bottom: 1px solid var(--accent);
+    }
+    #output table.dataframe td {
+      padding: 10px 14px; border-bottom: 1px solid var(--border);
+      vertical-align: middle; font-variant-numeric: tabular-nums;
+    }
+    #output table.dataframe tbody th {
+      background-color: var(--bg-body); color: var(--text-2);
+      font-weight: 400; text-align: center; width: 40px; min-width: 40px;
+      padding: 10px 8px; border-bottom: 1px solid var(--border);
+    }
+    #output table.dataframe tbody tr:last-child td,
+    #output table.dataframe tbody tr:last-child th { border-bottom: none; }
+    #output table.dataframe tbody tr:hover { background-color: var(--bg-hover); }
+    @media screen and (max-width: 600px) {
+      #output table.dataframe { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    }
 
     .empty-state {
       display: flex; flex-direction: column; align-items: center;
@@ -331,13 +349,7 @@
     .toast.toast-error { border-color: #ef4444; color: var(--error-text); }
     .toast.toast-success { border-color: var(--success); }
 
-    /* ── Responsive ── */
-    @media (max-width: 700px) {
-      .main { flex-direction: column; }
-      .panel-editor { width: 100%; height: 45%; border-right: none; border-bottom: 1px solid var(--border); }
-      .panel-output { width: 100%; height: 55%; }
-      .shortcuts, .drag-hint { display: none; }
-    }
+    /* ── Responsive: replaced by the @media (max-width: 760px) block at the end of this file ── */
 	
 	/* ── Footer ── */
 	.footer {
@@ -385,22 +397,7 @@ body.dragging-json-file::before {
   pointer-events: none;
 }
 
-body.dragging-json-file::after {
-  content: 'Drop JSON file to load project';
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.85);
-  color: #4CAF50;
-  padding: 30px 50px;
-  border-radius: 12px;
-  font-size: 24px;
-  font-weight: bold;
-  z-index: 10000;
-  pointer-events: none;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
+/* body.dragging-json-file::after is replaced by the rule appended at the end of this file */
 
 
 /* ── Modal: shared extensions ───────────────────────────────── */
@@ -607,3 +604,266 @@ body.dragging-json-file::after {
 .modal-actions .save-btn:hover { opacity: 0.9; }
 
 .dgxl-grid { font-family: 'Inter', system-ui, sans-serif !important; }
+
+/* ── Layout: sidebar | editor | output, resizable ── */
+:root { --w-side: 240px; --w-out: 42%; }
+.main {
+  display: grid; flex: 1; min-height: 0;
+  grid-template-columns: var(--w-side) 5px minmax(0, 1fr) 5px min(var(--w-out), 75vw);
+}
+.panel-editor, .panel-output { min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.splitter { background: var(--border); cursor: col-resize; transition: background .15s; outline: none; }
+.splitter:hover, .splitter.active, .splitter:focus-visible { background: var(--accent); }
+body.resizing { user-select: none; cursor: col-resize; }
+body.resizing iframe { pointer-events: none; }          /* Sage 3D plots live in iframes */
+body.side-collapsed .main { grid-template-columns: 0 0 minmax(0,1fr) 5px min(var(--w-out), 75vw); }
+body.side-collapsed .sidebar, body.side-collapsed #split-side { display: none; }
+@media (max-width: 760px) {
+  .main { display: flex; flex-direction: column; }
+  .sidebar, .splitter { display: none; }
+  .panel-editor { height: 55%; } .panel-output { height: 45%; }
+  .shortcuts { display: none; }
+}
+
+/* ── Project name / small toggles ── */
+.project-name {
+  margin-left: .8em; padding: .25em .5em; width: 220px; max-width: 30vw;
+  background: transparent; border: 1px solid transparent; border-radius: 6px;
+  color: var(--text); font: 500 .85rem 'Inter', system-ui, sans-serif;
+}
+.project-name:hover { border-color: var(--border); }
+.project-name:focus { outline: none; border-color: var(--border-focus); background: var(--bg-body); }
+.auto-toggle { font-size: .68rem; color: var(--text-3); display: inline-flex; gap: .3em; align-items: center; cursor: pointer; }
+
+/* ── Sidebar ── */
+.sidebar { background: var(--bg-inset); overflow-y: auto; font-size: .78rem; user-select: none; min-width: 0; }
+.sb-head, .sb-sec-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .45em .7em; font-size: .64rem; font-weight: 600; letter-spacing: .07em;
+  color: var(--text-3); text-transform: uppercase;
+}
+.sb-head { border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg-inset); z-index: 2; }
+.sb-sec-head { cursor: pointer; }
+.sb-sec-head:hover { color: var(--text); }
+.sb-sec.drop-into { background: var(--accent-soft); }
+.sb-btn { background: none; border: none; color: var(--text-3); cursor: pointer; padding: 2px 4px; border-radius: 4px; display: inline-flex; }
+.sb-btn:hover { color: var(--text); background: var(--bg-hover); }
+.sb-btn svg { width: 13px; height: 13px; }
+.sb-row {
+  display: flex; align-items: center; gap: .4em; padding: .28em .7em; cursor: pointer;
+  color: var(--text-2); position: relative; min-height: 26px;
+}
+.sb-row:hover { background: var(--bg-hover); }
+.sb-row.current { background: var(--accent-soft); color: var(--accent-tab); }
+.sb-row.inactive .sb-name { opacity: .55; font-style: italic; }
+.sb-row.dragging { opacity: .35; }
+.sb-row.drop-before::before, .sb-row.drop-after::after {
+  content: ''; position: absolute; left: .5em; right: .5em; height: 2px; background: var(--accent); border-radius: 2px;
+}
+.sb-row.drop-before::before { top: -1px; } .sb-row.drop-after::after { bottom: -1px; }
+.sb-num { width: 1.2em; text-align: right; color: var(--text-4); font-size: .68rem; font-variant-numeric: tabular-nums; }
+.sb-grip { color: var(--text-4); cursor: grab; font-size: .8rem; width: .9em; }
+.sb-star { color: var(--warning); width: 1.4em; text-align: center; }
+.sb-name { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-family: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  font-size: .74rem; letter-spacing: -0.01em; }
+.sb-badge { font-size: .62rem; color: var(--text-3); background: var(--bg-hover); border-radius: 8px; padding: 0 .5em; }
+.sb-warn { color: var(--warning); font-size: .8rem; }
+.sb-row .sb-btn { opacity: 0; } .sb-row:hover .sb-btn, .sb-row.current .sb-btn { opacity: .8; }
+.sb-rename { flex: 1; min-width: 0; font: inherit; padding: 1px 4px; border: 1px solid var(--border-focus); border-radius: 4px; background: var(--bg-body); color: var(--text); outline: none; }
+.sb-empty { padding: .5em 1em; color: var(--text-4); font-size: .7rem; font-style: italic; }
+.sb-kind { font-size: .6rem; color: var(--text-3); width: 7em; text-transform: uppercase; }
+.sb-row small { color: var(--text-3); }
+
+/* ── Tabs: inactive state ── */
+.file-tab.inactive .tab-name { font-style: italic; opacity: .6; }
+.tab-badge-off { background: var(--text-4) !important; }
+.file-tab .tab-close { opacity: .35; } .file-tab:hover .tab-close { opacity: .8; }
+.file-tab.main-tab .tab-close { display: flex; }          /* closing a tab is never destructive now */
+
+/* ── Context / dropdown menu ── */
+.ctx-menu {
+  position: fixed; z-index: 900; min-width: 180px; padding: 4px;
+  background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow);
+}
+.ctx-menu button { display: block; width: 100%; text-align: left; padding: .4em .7em; border: none; background: none;
+  color: var(--text); font: .78rem 'Inter', sans-serif; border-radius: 5px; cursor: pointer; }
+.ctx-menu button:hover:not(:disabled) { background: var(--accent); color: #fff; }
+.ctx-menu button:disabled { opacity: .4; cursor: default; }
+.ctx-menu hr { border: none; border-top: 1px solid var(--border); margin: 3px 0; }
+/* ── Run cards ── */
+#output.has-cards .empty-state { display: none; }
+.run-card { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 14px; overflow: hidden; background: var(--bg-surface); }
+.run-card > .rc-head { display: flex; justify-content: space-between; align-items: center; padding: 7px 12px;
+  background: var(--bg-inset); border-bottom: 1px solid var(--border); font-size: .74rem; color: var(--text-3); }
+.run-card .rc-actions { display: flex; gap: 4px; }
+.run-card .rc-actions button { border: none; background: none; cursor: pointer; color: var(--text-3);
+  font-size: .85rem; padding: 1px 6px; border-radius: 4px; line-height: 1.4; }
+.run-card .rc-actions button:hover { background: var(--bg-hover); color: var(--text); }
+.run-card .rc-in { display: none; }                       /* the code is already in the editor; keep the card clean */
+.run-card .rc-out { padding: 10px 12px; font-size: .82rem; overflow-x: auto; }
+.run-card .rc-out .cm-s-simple, .run-card .rc-out pre { background: transparent; margin: 0; }
+.run-card.folded .rc-out { display: none; }
+.err-link { color: var(--accent); text-decoration: underline; cursor: pointer; font-weight: 500; }
+.err-link:hover { text-decoration: none; }
+
+/* ── DataFrame chips (collapsed blocks in the editor) ── */
+.CodeMirror-linewidget .df-chip, .df-mark .df-chip { display: inline-flex; align-items: center; gap: 8px;
+  padding: 4px 10px; border: 1px solid var(--accent); border-radius: 999px; background: var(--accent-soft);
+  color: var(--text); font-size: .8rem; cursor: default; user-select: none; }
+.df-chip-tag { font-weight: 600; }
+.df-chip-shape { font-size: .72rem; color: var(--text-3); }
+.df-chip-actions { display: inline-flex; gap: 4px; }
+.df-chip-actions button { border: none; background: none; color: var(--accent); cursor: pointer;
+  font-size: .72rem; padding: 1px 5px; border-radius: 4px; }
+.df-chip-actions button:hover { background: var(--accent); color: #fff; }
+.df-peek { max-width: 480px; }
+.df-peek header { font-weight: 600; margin-bottom: 6px; }
+.df-peek footer { margin-top: 6px; font-size: .75rem; color: var(--text-3); }
+
+/* ── DataFrame manager modal ── */
+.modal-manager { width: min(720px, 94vw); }
+.dm-toolbar { display: flex; gap: 8px; padding: 12px 20px 0; }
+.dm-table { width: calc(100% - 40px); margin: 12px 20px; border-collapse: collapse; font-size: .82rem; }
+.dm-table th { text-align: left; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--text-3); padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.dm-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); }
+.dm-table tr[data-df]:hover { background: var(--bg-hover); cursor: pointer; }
+.dm-table small { color: var(--text-3); }
+.dm-export { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 0 20px 4px; font-size: .78rem; color: var(--text-2); }
+.dm-export select { font-size: .75rem; }
+
+/* ── Spreadsheet editor (multi-sheet) ── */
+.modal-overlay-wide .datagrid-editor-container { display: flex; flex-direction: column; width: min(1080px, 96vw);
+  max-height: 92vh; background: var(--bg-surface); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
+.datagrid-editor-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px 8px; }
+.datagrid-editor-header h3 { margin: 0; font-size: 1rem; }
+.datagrid-df-name { display: flex; align-items: center; gap: 6px; }
+.datagrid-df-name label { font-size: .75rem; color: var(--text-3); }
+.dg-tabs { display: flex; gap: 4px; padding: 0 20px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.dg-tab { border: 1px solid var(--border); border-bottom: none; background: var(--bg-inset); cursor: pointer;
+  padding: 5px 14px; border-radius: 7px 7px 0 0; font-size: .78rem; color: var(--text-2); white-space: nowrap; }
+.dg-tab.current { background: var(--bg-surface); color: var(--accent); font-weight: 600; border-color: var(--accent); }
+#datagridxl-container { flex: 1; min-height: 340px; overflow: hidden; }
+.datagrid-editor-footer { display: flex; align-items: center; gap: 10px; padding: 10px 20px; border-top: 1px solid var(--border); }
+.dg-target-label { font-size: .78rem; color: var(--text-3); }
+
+/* ── hint extras (cross-file states) ── */
+li.hint-later .hint-kind, li.hint-inactive .hint-kind { opacity: .8; }
+li.CodeMirror-hint.hint-later { color: var(--text-2); }
+li.CodeMirror-hint.hint-inactive { color: var(--text-3); font-style: italic; }
+
+/* ── popup (df peek + general popover) ── */
+.ide-popup { position: fixed; z-index: 950; background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: 10px; box-shadow: var(--shadow); padding: 12px 14px; max-width: 520px; max-height: 60vh; overflow: auto; }
+.ide-popup table.dm-table { width: auto; margin: 0; }
+
+/* ── toast with an action button ── */
+.toast.has-action { display: flex; align-items: center; gap: 12px; }
+.toast.has-action button { border: none; background: var(--accent); color: #fff; border-radius: 5px;
+  padding: 3px 10px; font-size: .75rem; cursor: pointer; }
+
+/* ── simple table editor (fallback grid) ── */
+#datagridxl-container table { border-collapse: collapse; font-size: .8rem; }
+#datagridxl-container th { background: var(--bg-inset); position: sticky; top: 0; }
+
+/* ── run card input hidden but present for SageCell ── */
+.run-card .sagecell, .run-card .sagecell .editor { background: transparent !important; }
+
+/* ── File tabs: drag-to-reorder + always-visible close ── */
+.file-tabs-bar { overflow-x: auto; }
+.file-tab { display: flex; align-items: center; gap: .4em; cursor: pointer; user-select: none; flex: none; }
+.file-tab[draggable="true"] { cursor: grab; }
+.file-tab .tab-close {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: none; border: none; color: inherit; cursor: pointer;
+  font-size: 1rem; line-height: 1; padding: 0 5px; border-radius: 4px; opacity: .5;
+}
+.file-tab:hover .tab-close, .file-tab.current .tab-close { opacity: .9; }
+.file-tab .tab-close:hover { opacity: 1; background: var(--bg-hover); }
+.file-tab.main-tab .tab-close { display: inline-flex; }
+.file-tab.current, .file-tab.active { color: var(--accent-tab); }
+.file-tab.inactive .tab-name { font-style: italic; opacity: .6; }
+.file-tab.dragging { opacity: .4; }
+.file-tab.drop-before { box-shadow: inset 2px 0 0 var(--accent); }
+.file-tab.drop-after  { box-shadow: inset -2px 0 0 var(--accent); }
+/* -- danger links + delete-project dialog -- */
+.danger-link {
+  padding: 0.4em 0.8em; background: transparent; cursor: pointer;
+  color: var(--text-2); border: 1px solid var(--border);
+  border-radius: 6px; font-size: 0.78rem;
+  font-family: inherit; transition: border-color 0.2s, color 0.2s;
+}
+.danger-link:hover { border-color: var(--text-3); color: #e5484d; background: rgba(229, 72, 77, .08); }
+#session-confirm {
+  position: fixed; inset: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, .55);
+}
+#session-confirm .sc-box {
+  background: var(--bg-surface); color: var(--text);
+  border-radius: 10px; padding: 22px 26px; max-width: 420px; margin: 20px;
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .35);
+}
+#session-confirm h3 { margin: 0 0 10px; font-size: 1.05rem; }
+#session-confirm p { margin: 0 0 18px; font-size: .9rem; line-height: 1.5; color: var(--text-2); }
+#session-confirm .sc-actions { display: flex; gap: 10px; justify-content: flex-end; }
+#session-confirm .sc-cancel {
+  background: none; border: 1px solid var(--border, #ccc); border-radius: 6px;
+  color: inherit; font: inherit; font-size: .85rem; padding: 7px 14px; cursor: pointer;
+}
+#session-confirm .sc-ok {
+  background: #e5484d; border: 1px solid #e5484d; border-radius: 6px;
+  color: #fff; font: inherit; font-size: .85rem; padding: 7px 14px; cursor: pointer;
+}
+
+/* -- help dialog -- */
+#help-btn {
+  width: 31px; height: 31px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text-2); cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  font-family: inherit; font-size: .9rem; font-weight: 600; line-height: 1;
+}
+#help-btn:hover { border-color: var(--text-3); color: var(--text); background: var(--bg-hover); }
+#help-dialog { border: 1px solid var(--border); border-radius: 8px; padding: 0; max-width: min(640px, 92vw);
+  background: var(--bg-surface); color: var(--text);
+  margin: auto; inset: 0; position: fixed; }
+#help-dialog::backdrop { background: rgba(0,0,0,.45); }
+#help-dialog .help-box { display: flex; flex-direction: column; max-height: 85vh; margin: 0; }
+#help-dialog header, #help-dialog footer { display: flex; align-items: center; justify-content: space-between; padding: .6rem 1rem; }
+#help-dialog header { border-bottom: 1px solid var(--border); }
+#help-dialog footer { border-top: 1px solid var(--border); justify-content: flex-end; }
+#help-dialog h3 { margin: 0; }
+#help-dialog .help-body { overflow-y: auto; padding: 0 1rem 1rem; line-height: 1.45; }
+#help-dialog h4 { margin: 1.1rem 0 .3rem; }
+#help-dialog ul { margin: .2rem 0; padding-left: 1.2rem; }
+#help-dialog table td { vertical-align: top; padding: .2rem .8rem .2rem 0; }
+#help-dialog code { font-family: ui-monospace, Consolas, monospace; font-size: .9em; background: var(--bg-inset); border-radius: 3px; padding: 0 .3em; }
+#help-dialog kbd { border: 1px solid var(--text-3); border-radius: 3px; padding: 0 .3em; font-size: .9em; }
+#help-dialog .help-ok { background: var(--accent, #4f8cc9); color: #fff; border: none; border-radius: 6px;
+  padding: 7px 16px; font: inherit; font-size: .85rem; cursor: pointer; }
+#help-dialog .help-x { background: none; border: 0; cursor: pointer; font-size: 1rem; color: inherit; opacity: .6; }
+#help-dialog .help-x:hover { opacity: 1; }
+
+/* -- find / replace bar -- */
+#find-bar { position: fixed; top: 56px; right: 24px; z-index: 60; width: 340px; padding: .5rem;
+  background: var(--bg-surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px;
+  box-shadow: var(--shadow); font-size: .9rem; }
+#find-bar[hidden] { display: none; }
+#find-bar .fb-row { display: flex; gap: .3rem; align-items: center; margin-bottom: .3rem; }
+#find-bar .fb-q, #find-bar .fb-r { flex: 1; min-width: 0; }
+#find-bar button { background: transparent; border: 1px solid var(--border); border-radius: 4px;
+  color: var(--text-2); font: inherit; font-size: .78rem; padding: 3px 8px; cursor: pointer; }
+#find-bar button:hover { border-color: var(--text-3); color: var(--text); }
+#find-bar .fb-opts { flex-wrap: wrap; gap: .6rem; font-size: .8rem; color: var(--text-2); }
+#find-bar .fb-opts label { display: inline-flex; align-items: center; gap: .25rem; cursor: pointer; }
+#find-bar .fb-info { margin-left: auto; opacity: .75; }
+#find-bar .fb-hits { list-style: none; margin: .3rem 0 0; padding: 0; max-height: 220px; overflow-y: auto; font-size: .8rem; }
+#find-bar .fb-hits li { padding: .15rem .3rem; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#find-bar .fb-hits li:hover { background: var(--bg-hover); }
+#find-bar .fb-hits b { color: var(--accent-text); font-weight: 500; }
+.find-hit { background: rgba(255, 213, 79, .4); outline: 1px solid rgba(255, 179, 0, .5); }
+[data-theme="dark"] .find-hit { background: rgba(250, 204, 21, .3); outline-color: rgba(250, 204, 21, .55); }

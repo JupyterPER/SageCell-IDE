@@ -19,10 +19,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/searchcursor.min.js"></script>
 
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 
-  <script src="https://sagecell.sagemath.org/static/embedded_sagecell.js"></script>
+  <script src="https://sage-sk.org/static/embedded_sagecell.js"></script>
   
   <!-- SheetJS for Excel support -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -34,22 +35,25 @@
 
   <link rel="stylesheet" href="css/styles.css">
 
-  <script>
-  // SageCell must be initialized before DOMContentLoaded
-  sagecell.makeSagecell({
-    inputLocation: '#sagecell-hidden',
-    outputLocation: '#output',
-    editor: 'textarea',
-    replaceOutput: false,
-    hide: ['editor','evalButton','done','sessionFiles', 'permalink'],
-    callback: function () {
-      var runBtn = document.getElementById('run');
-      if (runBtn) runBtn.disabled = false;
-    }
-  });
-  </script>
-  <script src="js/sagekeywords.js"></script>
-  <script src="js/sageide.js"></script>
+  <!-- JSZip for ZIP project export/import -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- PapaParse for CSV import -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+  <script defer src="js/sagekeywords.js"></script>
+  <script defer src="js/util.js"></script>
+  <script defer src="js/store.js"></script>
+  <script defer src="js/symbols.js"></script>
+  <script defer src="js/editor.js"></script>
+  <script defer src="js/find.js"></script>
+  <script defer src="js/layout.js"></script>
+  <script defer src="js/runner.js"></script>
+  <script defer src="js/help.js"></script>
+  <script defer src="js/sidebar.js"></script>
+  <script defer src="js/data.js"></script>
+  <script defer src="js/projectio.js"></script>
+  <script defer src="js/session.js"></script>
+  <script defer src="js/main.js"></script>
 </head>
 <body>
 <!-- ── Top Bar ── -->
@@ -57,8 +61,13 @@
   <div class="topbar-left">
     <div class="logo">S</div>
     <h1>Sage<span>Cell</span> IDE</h1>
+    <input id="project-name" class="project-name" type="text" spellcheck="false"
+           maxlength="80" value="Untitled project" title="Project name (used in exports)">
   </div>
   <div class="topbar-right">
+
+    <!-- Help -->
+    <button type="button" id="help-btn" title="How this IDE works" aria-label="Help">?</button>
 
     <!-- Theme toggle -->
     <button class="icon-btn" id="theme-btn" title="Toggle theme">
@@ -77,7 +86,7 @@
     <div class="btn-sep"></div>
 
     <!-- Open project -->
-    <button class="icon-btn" id="upload-btn" title="Open project (.json)">
+    <button class="icon-btn" id="upload-btn" title="Open (.json, .zip, .sage, .py)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
         <polyline points="17 8 12 3 7 8"></polyline>
@@ -85,8 +94,8 @@
       </svg>
     </button>
 
-    <!-- Save project -->
-    <button class="icon-btn" id="download-btn" title="Save project (.json)">
+    <!-- Save / export -->
+    <button class="icon-btn" id="download-btn" title="Save / export…">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
         <polyline points="7 10 12 15 17 10"></polyline>
@@ -94,8 +103,8 @@
       </svg>
     </button>
 
-    <!-- Data import/export -->
-    <button class="icon-btn" id="data-btn" title="Import/Export data (Ctrl+D)">
+    <!-- DataFrames -->
+    <button class="icon-btn" id="data-btn" title="DataFrames (Ctrl+D)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
         <polyline points="14 2 14 8 20 8"></polyline>
@@ -105,37 +114,59 @@
       </svg>
     </button>
 
+    <!-- Find / replace -->
+    <button class="icon-btn" id="find-btn" title="Find / replace (Ctrl+F)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    </button>
+
     <div class="btn-sep"></div>
+    <button type="button" id="reset-kernel-btn" class="danger-link" title="Forget all variables and start a fresh Sage kernel">Reset Sage Kernel</button>
+    <button type="button" id="delete-project-btn" class="danger-link" title="Remove the saved project from this browser">Delete project</button>
     <button class="clear-btn" id="clear">Clear Output</button>
-    <button class="run-btn" id="run" disabled>
-      <svg viewBox="0 0 24 24" fill="none"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor"></polygon></svg>
-      Run All
+    <button class="run-btn" id="run">
+      <svg viewBox="0 0 24 24" fill="none"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/></svg> Run All
     </button>
   </div>
 </div>
 
 <!-- ── Main Split ── -->
-<div class="main">
+<div class="main" id="main">
+  <aside class="sidebar" id="sidebar" aria-label="Project files"></aside>
+  <div class="splitter" id="split-side" role="separator" aria-orientation="vertical" tabindex="0" title="Drag to resize · double-click to reset"></div>
+
   <div class="panel-editor">
     <div class="file-tabs-bar" id="file-tabs-bar">
       <button class="tab-add-btn" id="add-tab-btn" title="New file">+</button>
     </div>
     <div class="panel-info">
-      <span class="run-order">Execution: <em id="run-order-text"></em> <span class="drag-hint">&nbsp;&middot; drag tabs to reorder</span></span>
-      <span class="shortcuts"><kbd>Shift</kbd>+<kbd>Enter</kbd> run &nbsp; <kbd>Ctrl</kbd>+<kbd>Space</kbd> complete &nbsp; <kbd>Ctrl</kbd>+<kbd>D</kbd> data</span>
+      <span class="run-order">Pipeline: <span id="run-order-text"></span></span>
+      <label class="auto-toggle" title="Show suggestions after you stop typing">
+        <input type="checkbox" id="auto-suggest"> auto-suggest
+      </label>
+      <span class="shortcuts"><kbd>Shift</kbd>+<kbd>Enter</kbd> run all &nbsp;
+        <kbd>Ctrl</kbd>+<kbd>Enter</kbd> run to cursor &nbsp;
+        <kbd>Ctrl</kbd>+<kbd>Space</kbd> complete &nbsp; <kbd>Ctrl</kbd>+<kbd>D</kbd> data</span>
     </div>
     <div class="editor-wrap" id="editor"></div>
   </div>
 
+  <div class="splitter" id="split-out" role="separator" aria-orientation="vertical" tabindex="0" title="Drag to resize · double-click to reset"></div>
+
   <div class="panel-output">
     <div class="panel-header">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
       Output
+      <label class="auto-toggle" style="margin-left:auto" title="Reuse one Sage session so variables survive between runs">
+        <input type="checkbox" id="keep-session" checked autocomplete="off"> keep session
+      </label>
     </div>
-    <div class="output-scroll">
+    <div class="output-scroll" id="output-scroll">
       <div id="output">
         <div class="empty-state" id="empty-state">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
           <p>Run your code to see results here</p>
         </div>
       </div>
@@ -143,101 +174,70 @@
   </div>
 </div>
 
-<!-- ── Rename Modal ── -->
-<div class="modal-overlay" id="rename-modal">
-  <div class="modal">
-    <h3>Rename file</h3>
-    <input type="text" id="rename-input" spellcheck="false">
-    <div class="modal-actions">
-      <button class="cancel-btn" id="rename-cancel">Cancel</button>
-      <button class="save-btn" id="rename-save">Rename</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- Data Import/Export Modal -->
+<!-- DataFrame manager -->
 <div class="modal-overlay" id="data-modal">
-  <div class="modal modal-data">
+  <div class="modal modal-manager">
     <div class="modal-header">
-      <h3>Data Import / Export</h3>
-      <p class="modal-subtitle">
-        Import, edit, or export data as a pandas DataFrame
-      </p>
+      <h3>DataFrames</h3>
+      <p class="modal-subtitle">Every DataFrame stored in your project files. Edit them in the spreadsheet or export them.</p>
     </div>
-
-    <div class="modal-field">
-      <label for="dataframe-name-input">DataFrame name</label>
-      <input type="text" id="dataframe-name-input" value="df" placeholder="df">
+    <div class="dm-toolbar">
+      <button class="data-action-btn" id="dm-import">Import CSV / Excel…</button>
+      <button class="data-action-btn" id="dm-new">New DataFrame</button>
+      <button class="data-action-btn" id="dm-edit-all">Edit all</button>
     </div>
-
-    <div class="modal-section">
-      <div class="modal-section-label">Import</div>
-      <div class="btn-grid-2">
-        <button class="data-action-btn" id="import-excel-btn">Excel</button>
-        <button class="data-action-btn" id="import-csv-btn">CSV</button>
-      </div>
+    <table class="dm-table">
+      <thead><tr><th>Name</th><th>Shape</th><th>File</th><th></th></tr></thead>
+      <tbody id="dm-rows"></tbody>
+    </table>
+    <div class="dm-export">
+      <span>Export all:</span>
+      <button class="data-action-btn" id="dm-export-xlsx">Excel (one sheet each)</button>
+      <button class="data-action-btn" id="dm-export-zip">ZIP of CSVs</button>
+      <select id="dm-delim" title="CSV delimiter">
+        <option value=",">delimiter ,</option><option value=";">delimiter ;</option><option value="&#9;">delimiter tab</option>
+      </select>
+      <label><input type="checkbox" id="dm-bom"> BOM (Excel)</label>
     </div>
-
-    <div class="modal-section">
-      <div class="modal-section-label">Edit</div>
-      <button class="data-action-btn" id="edit-data-btn">Open spreadsheet editor</button>
-    </div>
-
-    <div class="modal-section">
-      <div class="modal-section-label">Export</div>
-      <div class="btn-grid-2">
-        <button class="data-action-btn" id="export-excel-btn">Excel</button>
-        <button class="data-action-btn" id="export-csv-btn">CSV</button>
-      </div>
-    </div>
-
-    <div class="modal-actions">
-      <button class="cancel-btn" id="data-cancel">Close</button>
-    </div>
+    <div class="modal-actions"><button class="cancel-btn" id="data-cancel">Close</button></div>
   </div>
 </div>
 
-
-<!-- DataGrid XL Editor Modal -->
+<!-- Spreadsheet editor (multi-sheet) -->
 <div class="modal-overlay modal-overlay-wide" id="datagrid-modal">
   <div class="datagrid-editor-container">
     <div class="datagrid-editor-header">
       <div>
         <h3>Spreadsheet editor</h3>
-        <p class="modal-subtitle">Edit cells, then insert as a pandas DataFrame</p>
+        <p class="modal-subtitle">One tab per DataFrame. First row = column names.</p>
       </div>
       <div class="datagrid-df-name">
         <label for="datagrid-df-name">Name</label>
-        <input type="text" id="datagrid-df-name" value="df" placeholder="df">
+        <input type="text" id="datagrid-df-name" value="df" spellcheck="false">
       </div>
     </div>
-
+    <div class="dg-tabs" id="dg-tabs"></div>
     <div id="datagridxl-container"></div>
-
     <div class="datagrid-editor-footer">
+      <label class="dg-target-label">New frames go to
+        <select id="dg-target"></select></label>
+      <span style="flex:1"></span>
       <button class="cancel-btn" id="datagrid-cancel">Cancel</button>
-      <button class="save-btn" id="datagrid-save">Save &amp; insert</button>
+      <button class="save-btn" id="datagrid-save">Save all</button>
     </div>
   </div>
 </div>
 
-<!-- Hidden file inputs -->
-<input type="file" id="file-upload-input" accept=".json" style="display:none">
-<input type="file" id="excel-upload-input" accept=".xlsx,.xls" style="display:none">
-<input type="file" id="csv-upload-input" accept=".csv,text/csv" style="display:none">
-
-<!-- Hidden SageCell -->
-<div id="sagecell-hidden">
-  <script type="text/x-sage"></script>
-</div>
+<input type="file" id="file-upload-input" accept=".json,.zip,.sage,.py" multiple style="display:none">
+<input type="file" id="data-upload-input" accept=".csv,.tsv,.txt,.xlsx,.xls" multiple style="display:none">
 
 <!-- ── Footer ─ -->
 <div class="footer">
-  <span>© 2026 Dominik Borovský &amp; Jozef Hanč </span>
+  <span>© 2025-<span id="footer-year">2025</span> Dominik Borovský &amp; Jozef Hanč </span>
   <span class="footer-sep">·</span>
   <a href="https://www.sagemath.org" target="_blank" rel="noopener">Powered by SageMath</a>
 </div>
 
+<script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
 </body>
 </html>
